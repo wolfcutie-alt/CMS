@@ -58,7 +58,7 @@ export function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="text-slate-700">
-                {user ? `${user.firstName} ${user.lastName}` : "My Account"}
+                {user ? `${user.name}` : "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-slate-600 hover:text-blue-600">Profile</DropdownMenuItem>

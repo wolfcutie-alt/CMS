@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, LogIn } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { apiClient } from "@/lib/api"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -25,27 +26,20 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock authentication - in real app, validate with your backend
-      if (email === "admin@example.com" && password === "password") {
-        // Store auth token/session
-        localStorage.setItem("isAuthenticated", "true")
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email,
-            name: "Admin User",
-            role: "admin",
-          }),
-        )
-        router.push("/")
-      } else {
-        setError("Invalid email or password")
-      }
+      const response = await apiClient.login(email, password)
+      
+      // Store auth token and user data
+      localStorage.setItem("authToken", response.token)
+      localStorage.setItem("user", JSON.stringify(response.user))
+      localStorage.setItem("isAuthenticated", "true")
+      
+      router.push("/")
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("An error occurred. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }

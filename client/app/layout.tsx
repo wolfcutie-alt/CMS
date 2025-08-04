@@ -7,8 +7,7 @@ import { AuthGuard } from "@/components/auth-guard"
 
 export const metadata: Metadata = {
   title: "CMS Admin - Content Management System",
-  description: "A modern content management system built with Next.js",
-  generator: "v0.dev",
+  description: "A modern content management system built with Next.js"
 }
 
 export default function RootLayout({

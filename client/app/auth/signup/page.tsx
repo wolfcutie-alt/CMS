@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, UserPlus, Check } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { apiClient } from "@/lib/api"
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -34,7 +34,7 @@ export default function SignupPage() {
   }
 
   const validateForm = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+    if (!formData.name || !formData.email || !formData.password) {
       setError("All fields are required")
       return false
     }
@@ -68,27 +68,26 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await apiClient.signup(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.confirmPassword
+      )
 
-      // Mock user creation - in real app, send to your backend
-      const newUser = {
-        id: Date.now(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        role: "editor",
-        createdAt: new Date().toISOString(),
-      }
-
-      // Store user data
+      // Store auth token and user data
+      localStorage.setItem("authToken", response.token)
+      localStorage.setItem("user", JSON.stringify(response.user))
       localStorage.setItem("isAuthenticated", "true")
-      localStorage.setItem("user", JSON.stringify(newUser))
 
       // Redirect to dashboard
       router.push("/")
     } catch (err) {
-      setError("An error occurred. Please try again.")
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("An error occurred. Please try again.")
+      }
     } finally {
       setIsLoading(false)
     }
@@ -135,31 +134,17 @@ export default function SignupPage() {
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">{error}</div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    placeholder="John"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    placeholder="Doe"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
