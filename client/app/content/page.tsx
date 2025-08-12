@@ -10,63 +10,13 @@ import Link from "next/link"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { usePosts } from "@/hooks/usePost"
 
 export default function ContentPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
 
-  const posts = [
-    {
-      id: 1,
-      title: "Getting Started with Next.js 15",
-      excerpt: "Learn the fundamentals of Next.js 15 and build your first application with the latest features.",
-      status: "published",
-      author: "John Doe",
-      date: "2024-01-15",
-      views: 1234,
-      category: "Tutorial",
-    },
-    {
-      id: 2,
-      title: "Building Modern Web Applications",
-      excerpt: "Explore modern web development practices and tools for building scalable applications.",
-      status: "draft",
-      author: "Jane Smith",
-      date: "2024-01-14",
-      views: 0,
-      category: "Guide",
-    },
-    {
-      id: 3,
-      title: "The Future of Web Development",
-      excerpt: "Discover upcoming trends and technologies that will shape the future of web development.",
-      status: "published",
-      author: "Mike Johnson",
-      date: "2024-01-13",
-      views: 856,
-      category: "Opinion",
-    },
-    {
-      id: 4,
-      title: "CSS Grid vs Flexbox: When to Use What",
-      excerpt: "A comprehensive comparison of CSS Grid and Flexbox with practical examples.",
-      status: "published",
-      author: "Sarah Wilson",
-      date: "2024-01-12",
-      views: 2341,
-      category: "Tutorial",
-    },
-    {
-      id: 5,
-      title: "React Server Components Explained",
-      excerpt: "Understanding React Server Components and how they improve application performance.",
-      status: "draft",
-      author: "Alex Brown",
-      date: "2024-01-11",
-      views: 0,
-      category: "Technical",
-    },
-  ]
+  const { posts, loading, error } = usePosts();
 
   const filteredPosts = posts.filter((post) => {
     const matchesSearch =

@@ -25,8 +25,20 @@
     },
     "tags": [
         {
+            "name": "Users",
+            "description": "Users"
+        },
+        {
             "name": "Posts",
             "description": "Posts"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
+        {
+            "name": "Medias",
+            "description": "Medias"
         }
     ]
 }
