@@ -5,6 +5,23 @@
         "version": "0.1"
     },
     "paths": {
+        "/api/category": {
+            "get": {
+                "tags": [
+                    "Category"
+                ],
+                "summary": "Get a list of categories",
+                "operationId": "d2f23b45653dc0dff84f355889899c25",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            }
+        },
         "/api/posts": {
             "get": {
                 "tags": [
@@ -20,25 +37,79 @@
                         "description": "Invalid request"
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Create a post",
+                "operationId": "dcb66200c3132996151884ac232cf439",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            }
+        },
+        "/api/posts/:id": {
+            "get": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get a post",
+                "operationId": "6eafd6aa986a64a5dd1a74b2b109915f",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Update a post",
+                "operationId": "b8e069016144d9724a69b34cb0484ac8",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Delete a post",
+                "operationId": "d50589b0ee0a4d0aa5df1afa48738b73",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
             }
         }
     },
     "tags": [
         {
-            "name": "Users",
-            "description": "Users"
+            "name": "Category",
+            "description": "Category"
         },
         {
             "name": "Posts",
             "description": "Posts"
-        },
-        {
-            "name": "Categories",
-            "description": "Categories"
-        },
-        {
-            "name": "Medias",
-            "description": "Medias"
         }
     ]
 }

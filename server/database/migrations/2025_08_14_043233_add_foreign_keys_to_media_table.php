@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('posts', function (Blueprint $table) {
-            $table->id('post_id');
-            $table->timestamps();
+        Schema::table('media', function (Blueprint $table) {
+            $table->foreign(['uploadedBy'], 'media_ibfk_1')->references(['id'])->on('users')->onUpdate('no action')->onDelete('cascade');
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('posts');
+        Schema::table('media', function (Blueprint $table) {
+            $table->dropForeign('media_ibfk_1');
+        });
     }
 };
