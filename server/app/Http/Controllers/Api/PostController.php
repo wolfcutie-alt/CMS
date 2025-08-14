@@ -19,7 +19,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        return response()->json(Post::all());
+        return response()->json(Post::all(), 200);
     }
 
     /**
@@ -34,6 +34,7 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $post = Post::create($request->all());
+        return response()->json($post, 201);
     }
 
     /**
@@ -48,6 +49,7 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::findOrFail($id);
+        return response()->json($post, 200);
     }
 
     /**
@@ -63,6 +65,7 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
         $post->update($request->all());
+        return response()->json($post, 200);
     }
 
     /**
@@ -78,6 +81,7 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
         $post->delete();
+        return response()->json(null,204);
     }
 
 }

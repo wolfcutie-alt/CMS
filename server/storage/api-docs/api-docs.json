@@ -5,6 +5,38 @@
         "version": "0.1"
     },
     "paths": {
+        "/api/analytics": {
+            "get": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Get a list of analytics",
+                "operationId": "91f05d573d32081ed90b04e79a98ee8c",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Create a analytic",
+                "operationId": "6751e5a826d85cf8425b8aa26ec0eb43",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    }
+                }
+            }
+        },
         "/api/category": {
             "get": {
                 "tags": [
@@ -103,6 +135,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Analytics",
+            "description": "Analytics"
+        },
         {
             "name": "Category",
             "description": "Category"
