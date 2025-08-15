@@ -1,6 +1,6 @@
 -- Create database schema
-CREATE DATABASE IF NOT EXISTS cms_admin;
-USE cms_admin;
+CREATE DATABASE IF NOT EXISTS laravel;
+USE laravel;
 
 -- Users table
 CREATE TABLE users (
@@ -27,8 +27,8 @@ CREATE TABLE categories (
     slug VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
     color VARCHAR(7) DEFAULT '#3b82f6',
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     INDEX idx_categories_slug (slug)
 );
@@ -48,8 +48,8 @@ CREATE TABLE posts (
     likes INT DEFAULT 0,
     shares INT DEFAULT 0,
     publishedAt TIMESTAMP NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (authorId) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (categoryId) REFERENCES categories(id) ON DELETE SET NULL,
@@ -72,8 +72,8 @@ CREATE TABLE comments (
     status ENUM('pending', 'approved', 'spam', 'flagged') DEFAULT 'pending',
     ipAddress VARCHAR(45),
     userAgent TEXT,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
     FOREIGN KEY (parentId) REFERENCES comments(id) ON DELETE CASCADE,
@@ -96,8 +96,8 @@ CREATE TABLE media (
     alt VARCHAR(255),
     caption TEXT,
     uploadedBy INT NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (uploadedBy) REFERENCES users(id) ON DELETE CASCADE,
     
@@ -112,8 +112,8 @@ CREATE TABLE settings (
     settingKey VARCHAR(100) NOT NULL,
     settingValue TEXT,
     valueType ENUM('string', 'number', 'boolean', 'json') DEFAULT 'string',
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     UNIQUE KEY idx_settings_category_key (category, settingKey)
 );
@@ -128,14 +128,14 @@ CREATE TABLE analytics (
     ipAddress VARCHAR(45),
     userAgent TEXT,
     metadata JSON,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL,
     
     INDEX idx_analytics_type (type),
     INDEX idx_analytics_entity (entityType, entityId),
     INDEX idx_analytics_user (userId),
-    INDEX idx_analytics_date (createdAt)
+    INDEX idx_analytics_date (created_at)
 );
 
 -- Post Media junction table
@@ -143,7 +143,7 @@ CREATE TABLE post_media (
     id INT AUTO_INCREMENT PRIMARY KEY,
     postId INT NOT NULL,
     mediaId INT NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
     FOREIGN KEY (mediaId) REFERENCES media(id) ON DELETE CASCADE,
@@ -158,8 +158,8 @@ CREATE TABLE post_seo (
     metaTitle VARCHAR(255),
     metaDescription TEXT,
     keywords JSON,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
     UNIQUE KEY idx_post_seo_post (postId)
