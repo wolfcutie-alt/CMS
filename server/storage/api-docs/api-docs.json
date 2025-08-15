@@ -1,151 +1,291 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "My First API",
-        "version": "0.1"
+      "title": "My First API",
+      "version": "0.1"
     },
     "paths": {
-        "/api/analytics": {
-            "get": {
-                "tags": [
-                    "Analytics"
-                ],
-                "summary": "Get a list of analytics",
-                "operationId": "91f05d573d32081ed90b04e79a98ee8c",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
+      "/api/analytic": {
+        "post": {
+          "tags": [
+            "Analytic"
+          ],
+          "summary": "Create an analytic",
+          "operationId": "6751e5a826d85cf8425b8aa26ec0eb43",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
             },
-            "post": {
-                "tags": [
-                    "Analytics"
-                ],
-                "summary": "Create a analytic",
-                "operationId": "6751e5a826d85cf8425b8aa26ec0eb43",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
+            "400": {
+              "description": "Invalid request"
             }
-        },
-        "/api/category": {
-            "get": {
-                "tags": [
-                    "Category"
-                ],
-                "summary": "Get a list of categories",
-                "operationId": "d2f23b45653dc0dff84f355889899c25",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
-            }
-        },
-        "/api/posts": {
-            "get": {
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Get a list of posts",
-                "operationId": "3fda362e2e082b5357ac416e7767e435",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Create a post",
-                "operationId": "dcb66200c3132996151884ac232cf439",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
-            }
-        },
-        "/api/posts/:id": {
-            "get": {
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Get a post",
-                "operationId": "6eafd6aa986a64a5dd1a74b2b109915f",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Update a post",
-                "operationId": "b8e069016144d9724a69b34cb0484ac8",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Posts"
-                ],
-                "summary": "Delete a post",
-                "operationId": "d50589b0ee0a4d0aa5df1afa48738b73",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "400": {
-                        "description": "Invalid request"
-                    }
-                }
-            }
+          }
         }
+      },
+      "/api/category": {
+        "get": {
+          "tags": [
+            "Category"
+          ],
+          "summary": "Get a list of categories",
+          "operationId": "d2f23b45653dc0dff84f355889899c25",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/post": {
+        "get": {
+          "tags": [
+            "Post"
+          ],
+          "summary": "Get a list of posts",
+          "operationId": "3fda362e2e082b5357ac416e7767e435",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Post"
+          ],
+          "summary": "Create a post",
+          "operationId": "dcb66200c3132996151884ac232cf439",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/comment": {
+        "get": {
+          "tags": [
+            "Comment"
+          ],
+          "summary": "Get a list of comment",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Comment"
+          ],
+          "summary": "Create a comment",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/posts": {
+        "get": {
+          "tags": [
+            "Post"
+          ],
+          "summary": "Get a list of posts",
+          "operationId": "3fda362e2e082b5357ac416e7767e435",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Post"
+          ],
+          "summary": "Create a post",
+          "operationId": "dcb66200c3132996151884ac232cf439",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/media": {
+        "get": {
+          "tags": [
+            "Media"
+          ],
+          "summary": "Get a list of media",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Media"
+          ],
+          "summary": "Create a media",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/postmedia": {
+        "get": {
+          "tags": [
+            "PostMedia"
+          ],
+          "summary": "Get a list of postmedia",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "PostMedia"
+          ],
+          "summary": "Create a postmedia",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/postseo": {
+        "get": {
+          "tags": [
+            "PostSeo"
+          ],
+          "summary": "Get a list of postseo",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "PostSeo"
+          ],
+          "summary": "Create a postseo",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/api/setting": {
+        "get": {
+          "tags": [
+            "Setting"
+          ],
+          "summary": "Get a list of setting",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Setting"
+          ],
+          "summary": "Create a setting",
+          "responses": {
+            "200": {
+              "description": "Successful operation"
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      }
     },
     "tags": [
-        {
-            "name": "Analytics",
-            "description": "Analytics"
-        },
-        {
-            "name": "Category",
-            "description": "Category"
-        },
-        {
-            "name": "Posts",
-            "description": "Posts"
-        }
+      {
+        "name": "Analytic",
+        "description": "Analytic"
+      },
+      {
+        "name": "Category",
+        "description": "Category"
+      },
+      {
+        "name": "Comment",
+        "description": "Comment"
+      },
+      {
+        "name": "Media",
+        "description": "Media"
+      },
+      {
+        "name": "Post",
+        "description": "Post"
+      },
+      {
+        "name": "PostMedia",
+        "description": "Post Media"
+      },
+      {
+        "name": "PostSeo",
+        "description": "Post Seo"
+      },
+      {
+        "name": "Setting",
+        "description": "Setting"
+      }
     ]
-}
+  }

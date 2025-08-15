@@ -10,12 +10,22 @@ class PostController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/posts",
-     *     summary="Get a list of posts",
-     *     tags={"Posts"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
-     * )
+     *      path="/posts",
+     *      operationId="getPostsList",
+     *      tags={"Posts"},
+     *      summary="Get list of posts",
+     *      description="Returns list of posts",
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Returns list of posts
      */
     public function index()
     {
