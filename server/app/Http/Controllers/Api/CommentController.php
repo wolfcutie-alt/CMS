@@ -9,7 +9,23 @@ use Illuminate\Http\Request;
 class CommentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *      path="/comment",
+     *      operationId="getCommentsList",
+     *      tags={"Comment"},
+     *      summary="Get list of comments",
+     *      description="Returns list of comments",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Returns list of comments
      */
     public function index()
     {
@@ -18,7 +34,23 @@ class CommentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *      path="/comment",
+     *      operationId="createAComment",
+     *      tags={"Comment"},
+     *      summary="Create a comment",
+     *      description="Create a comment",
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Create a comment
      */
     public function store(Request $request)
     {
@@ -32,7 +64,22 @@ class CommentController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/comment/:id",
+     *     operationId="getAComment",
+     *     summary="Get a comment",
+     *     tags={"Comment"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Return a comment
      */
     public function show(Comment $comment)
     {
@@ -40,7 +87,22 @@ class CommentController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/comment/:id",
+     *     operationId="updateAComment",
+     *     summary="Update a comment",
+     *     tags={"Comment"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Update a comment
      */
     public function update(Request $request, Comment $comment)
     {
@@ -53,7 +115,22 @@ class CommentController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/comment/:id",
+     *     operationId="deleteAComment",
+     *     summary="Delete a comment",
+     *     tags={"Comment"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Delete a comment
      */
     public function destroy(Comment $comment)
     {

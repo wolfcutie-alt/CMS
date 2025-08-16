@@ -10,14 +10,14 @@ class PostController extends Controller
 {
     /**
      * @OA\Get(
-     *      path="/posts",
+     *      path="/post",
      *      operationId="getPostsList",
-     *      tags={"Posts"},
+     *      tags={"Post"},
      *      summary="Get list of posts",
      *      description="Returns list of posts",
      *      @OA\Response(
      *          response=200,
-     *          description="successful operation"
+     *          description="Successful operation"
      *       ),
      *       @OA\Response(response=400, description="Bad request"),
      *       security={
@@ -34,12 +34,22 @@ class PostController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/posts",
-     *     summary="Create a post",
-     *     tags={"Posts"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
-     * )
+     *      path="/post",
+     *      operationId="createAPost",
+     *      tags={"Post"},
+     *      summary="Create a post",
+     *      description="Create a post",
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Create a post
      */
     public function store(Request $request)
     {
@@ -49,12 +59,21 @@ class PostController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/posts/:id",
+     *     path="/post/:id",
+     *     operationId="getAPost",
      *     summary="Get a post",
-     *     tags={"Posts"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
+     *     tags={"Post"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
      * )
+     * 
+     * Return a post
      */
     public function show($id)
     {
@@ -64,12 +83,21 @@ class PostController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/posts/:id",
+     *     path="/post/:id",
+     *     operationId="updateAPost",
      *     summary="Update a post",
-     *     tags={"Posts"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
+     *     tags={"Post"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
      * )
+     * 
+     * Update a post
      */
     public function update(Request $request, $id)
     {
@@ -80,12 +108,21 @@ class PostController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/posts/:id",
+     *     path="/post/:id",
+     *     operationId="deleteAPost",
      *     summary="Delete a post",
-     *     tags={"Posts"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
+     *     tags={"Post"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
      * )
+     * 
+     * Delete a post
      */
     public function destroy($id)
     {

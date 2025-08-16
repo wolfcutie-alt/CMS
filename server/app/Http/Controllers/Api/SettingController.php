@@ -9,42 +9,122 @@ use Illuminate\Http\Request;
 class SettingController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *      path="/setting",
+     *      operationId="getSettingsList",
+     *      tags={"Setting"},
+     *      summary="Get list of settings",
+     *      description="Returns list of settings",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Returns list of settings
      */
     public function index()
     {
-        //
+        $setting = Setting::all();
+        return response()->json($setting);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *      path="/setting",
+     *      operationId="createASetting",
+     *      tags={"Setting"},
+     *      summary="Create a setting",
+     *      description="Create a setting",
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Create a setting
      */
     public function store(Request $request)
     {
-        //
+        $setting = Setting::create($request->all());
+        return response()->json($setting);
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/setting/:id",
+     *     operationId="getASetting",
+     *     summary="Get a setting",
+     *     tags={"Setting"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Return a setting
      */
     public function show(Setting $setting)
     {
-        //
+        return response()->json($setting);
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/setting/:id",
+     *     operationId="updateASetting",
+     *     summary="Update a setting",
+     *     tags={"Setting"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Update a setting
      */
     public function update(Request $request, Setting $setting)
     {
-        //
+        $setting->update($request->all());
+        return response()->json($setting);
     }
-
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/setting/:id",
+     *     operationId="deleteASetting",
+     *     summary="Delete a setting",
+     *     tags={"Setting"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Delete a setting
      */
     public function destroy(Setting $setting)
     {
-        //
+        $setting->delete();
+        return response()->json(null,204);
     }
 }

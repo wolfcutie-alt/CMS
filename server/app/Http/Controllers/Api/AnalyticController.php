@@ -10,12 +10,22 @@ class AnalyticController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/analytics",
-     *     summary="Get a list of analytics",
-     *     tags={"Analytics"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
-     * )
+     *      path="/analytic",
+     *      operationId="getAnalyticsList",
+     *      tags={"Analytic"},
+     *      summary="Get list of analytics",
+     *      description="Returns list of analytics",
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Returns list of analytics
      */
     public function index()
     {
@@ -25,12 +35,22 @@ class AnalyticController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/analytics",
-     *     summary="Create a analytic",
-     *     tags={"Analytics"},
-     *     @OA\Response(response=200, description="Successful operation"),
-     *     @OA\Response(response=400, description="Invalid request")
-     * )
+     *      path="/analytic",
+     *      operationId="createAnAnalytic",
+     *      tags={"Analytic"},
+     *      summary="Create a analytic",
+     *      description="Create a analytic",
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     *     )
+     *
+     * Create a analytic
      */
     public function store(Request $request)
     {
@@ -39,7 +59,22 @@ class AnalyticController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/analytic/:id",
+     *     operationId="getAnAnalytic",
+     *     summary="Get an analytic",
+     *     tags={"Analytic"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Get an analytic
      */
     public function show(Analytic $analytic)
     {
@@ -47,7 +82,22 @@ class AnalyticController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/analytic/:id",
+     *     operationId="updateAnAnalytic",
+     *     summary="Update an analytic",
+     *     tags={"Analytic"},
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Update an analytic
      */
     public function update(Request $request, Analytic $analytic)
     {
@@ -56,7 +106,22 @@ class AnalyticController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/analytic/:id",
+     *     operationId="deleteAnAnalytic",
+     *     summary="Delete an analytic",
+     *     tags={"Analytic"},
+     *      @OA\Response(
+     *          response=204,
+     *          description="Successful operation"
+     *       ),
+     *       @OA\Response(response=400, description="Bad request"),
+     *       security={
+     *           {"api_key_security_example": {}}
+     *       }
+     * )
+     * 
+     * Delete an analytic
      */
     public function destroy(Analytic $analytic)
     {
