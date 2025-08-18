@@ -1,24 +1,5 @@
 import { useState, useEffect } from "react"
-
-type PostStatus = 'draft' | 'published' | 'archived';
-
-interface Post {
-    id: number;                     // INT PK
-    title: string;                  // VARCHAR(255)
-    slug: string;                   // VARCHAR(255)
-    excerpt: string | null;         // TEXT, allow null if DB allows
-    content: string;                // LONGTEXT/TEXT
-    status: PostStatus;             // ENUM
-    authorId: number;               // INT
-    categoryId: number | null;      // INT, nullable if not always set
-    featuredImage: string | null;   // VARCHAR(255) URL or path
-    views: number;                  // INT
-    likes: number;                  // INT
-    shares: number;                 // INT
-    publishedAt: string | null;     // TIMESTAMP as ISO string
-    created_at: string;             // TIMESTAMP
-    updated_at: string;             // TIMESTAMP
-  }
+import { Post } from "@/types";
 
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
