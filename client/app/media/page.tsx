@@ -22,6 +22,7 @@ import {
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useMedias } from "@/hooks/useMedia"
 
 export default function MediaPage() {
   const [searchTerm, setSearchTerm] = useState("")

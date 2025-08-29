@@ -21,7 +21,7 @@ export default function ContentPage() {
   const filteredPosts = posts.filter((post) => {
     const matchesSearch =
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+      post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || post.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -98,13 +98,13 @@ export default function ContentPage() {
                             variant="outline"
                             className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200"
                           >
-                            {post.category}
+                            {post.categoryId}
                           </Badge>
                         </div>
                         <p className="text-gray-600 mb-3">{post.excerpt}</p>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>By {post.author}</span>
-                          <span>{post.date}</span>
+                          <span>By {post.authorId}</span>
+                          <span>{post.publishedAt}</span>
                           <span className="flex items-center gap-1">
                             <Eye className="w-4 h-4" />
                             {post.views} views

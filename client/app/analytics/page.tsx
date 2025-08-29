@@ -7,128 +7,128 @@ import { TrendingUp, TrendingDown, Eye, Users, FileText, MessageSquare, Calendar
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAnalytics } from "@/hooks/useAnalytic"
+import { useMemo } from "react"
 
 export default function AnalyticsPage() {
-  const stats = [
-    {
-      title: "Total Views",
-      value: "45,231",
-      change: "+12.5%",
-      trend: "up",
-      icon: Eye,
-      bgColor: "bg-gradient-to-r from-blue-500 to-cyan-500",
-      textColor: "text-blue-600",
-    },
-    {
-      title: "Unique Visitors",
-      value: "12,543",
-      change: "+8.2%",
-      trend: "up",
-      icon: Users,
-      bgColor: "bg-gradient-to-r from-green-500 to-emerald-500",
-      textColor: "text-green-600",
-    },
-    {
-      title: "Published Posts",
-      value: "24",
-      change: "+2",
-      trend: "up",
-      icon: FileText,
-      bgColor: "bg-gradient-to-r from-purple-500 to-violet-500",
-      textColor: "text-purple-600",
-    },
-    {
-      title: "Comments",
-      value: "1,234",
-      change: "-3.1%",
-      trend: "down",
-      icon: MessageSquare,
-      bgColor: "bg-gradient-to-r from-orange-500 to-red-500",
-      textColor: "text-orange-600",
-    },
-  ]
+  const { analytics, loading, error } = useAnalytics()
 
-  const topPosts = [
-    {
-      id: 1,
-      title: "Getting Started with Next.js 15",
-      views: 5234,
-      comments: 89,
-      shares: 45,
-      date: "2024-01-15",
-    },
-    {
-      id: 2,
-      title: "CSS Grid vs Flexbox: When to Use What",
-      views: 4123,
-      comments: 67,
-      shares: 32,
-      date: "2024-01-12",
-    },
-    {
-      id: 3,
-      title: "React Server Components Explained",
-      views: 3456,
-      comments: 54,
-      shares: 28,
-      date: "2024-01-11",
-    },
-    {
-      id: 4,
-      title: "Building Modern Web Applications",
-      views: 2987,
-      comments: 43,
-      shares: 21,
-      date: "2024-01-14",
-    },
-    {
-      id: 5,
-      title: "The Future of Web Development",
-      views: 2654,
-      comments: 38,
-      shares: 19,
-      date: "2024-01-13",
-    },
-  ]
+  const stats = useMemo(() => {
+    const totalViews = analytics.filter(a => a.type === 'view').length
+    const uniqueVisitors = new Set(analytics.map(a => (a.userId ?? a.ipAddress) || `${a.ipAddress}`)).size
+    const publishedPosts = analytics.filter(a => a.type === 'post').length
+    const comments = analytics.filter(a => a.type === 'comment').length
 
-  const trafficSources = [
-    { source: "Organic Search", visitors: 8234, percentage: 45 },
-    { source: "Direct", visitors: 4567, percentage: 25 },
-    { source: "Social Media", visitors: 2890, percentage: 16 },
-    { source: "Referral", visitors: 1456, percentage: 8 },
-    { source: "Email", visitors: 1098, percentage: 6 },
-  ]
+    return [
+      {
+        title: "Total Views",
+        value: totalViews.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: Eye,
+        bgColor: "bg-gradient-to-r from-blue-500 to-cyan-500",
+        textColor: "text-blue-600",
+      },
+      {
+        title: "Unique Visitors",
+        value: uniqueVisitors.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: Users,
+        bgColor: "bg-gradient-to-r from-green-500 to-emerald-500",
+        textColor: "text-green-600",
+      },
+      {
+        title: "Published Posts",
+        value: publishedPosts.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: FileText,
+        bgColor: "bg-gradient-to-r from-purple-500 to-violet-500",
+        textColor: "text-purple-600",
+      },
+      {
+        title: "Comments",
+        value: comments.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: MessageSquare,
+        bgColor: "bg-gradient-to-r from-orange-500 to-red-500",
+        textColor: "text-orange-600",
+      },
+    ] as const
+  }, [analytics])
 
-  const recentActivity = [
-    {
-      id: 1,
-      action: "New comment on",
-      target: "Getting Started with Next.js 15",
-      user: "John Doe",
-      time: "2 minutes ago",
-    },
-    {
-      id: 2,
-      action: "Post published:",
-      target: "Building Modern Web Applications",
-      user: "Jane Smith",
-      time: "1 hour ago",
-    },
-    {
-      id: 3,
-      action: "User registered:",
-      target: "alex@example.com",
-      user: "System",
-      time: "3 hours ago",
-    },
-    {
-      id: 4,
-      action: "Comment approved on",
-      target: "CSS Grid vs Flexbox",
-      user: "Admin",
-      time: "5 hours ago",
-    },
-  ]
+  const topPosts = useMemo(() => {
+    const viewsByPost = new Map<number, number>()
+    const commentsByPost = new Map<number, number>()
+
+    analytics.forEach(a => {
+      if (a.entityType === 'post') {
+        if (a.type === 'view') {
+          viewsByPost.set(a.entityId, (viewsByPost.get(a.entityId) || 0) + 1)
+        }
+        if (a.type === 'comment') {
+          commentsByPost.set(a.entityId, (commentsByPost.get(a.entityId) || 0) + 1)
+        }
+      }
+    })
+
+    const items = Array.from(viewsByPost.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([postId, views]) => {
+        const related = analytics.filter(a => a.entityType === 'post' && a.entityId === postId)
+        const latest = related.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
+        return {
+          id: postId,
+          title: `Post #${postId}`,
+          views,
+          comments: commentsByPost.get(postId) || 0,
+          date: latest ? new Date(latest.created_at).toISOString().slice(0, 10) : "",
+        }
+      })
+
+    return items
+  }, [analytics])
+
+  const trafficSources = useMemo(() => {
+    // Prefer metadata.source if available; fallback to entityType distribution
+    const groups = new Map<string, number>()
+    analytics.forEach(a => {
+      const source = (a.metadata && (a.metadata.source || a.metadata.referrer)) || a.entityType || 'Other'
+      groups.set(source, (groups.get(source) || 0) + 1)
+    })
+    const total = Array.from(groups.values()).reduce((s, v) => s + v, 0) || 1
+    return Array.from(groups.entries()).map(([source, visitors]) => ({
+      source,
+      visitors,
+      percentage: Math.round((visitors / total) * 100),
+    }))
+  }, [analytics])
+
+  const recentActivity = useMemo(() => {
+    const describeAction = (t: string) => {
+      if (t === 'comment') return 'New comment on'
+      if (t === 'post') return 'Post activity:'
+      if (t === 'view') return 'Viewed'
+      if (t === 'share') return 'Shared'
+      if (t === 'download') return 'Downloaded'
+      if (t === 'login') return 'User login:'
+      if (t === 'logout') return 'User logout:'
+      return 'Activity on'
+    }
+    return [...analytics]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 10)
+      .map(a => ({
+        id: a.id,
+        action: describeAction(a.type),
+        target: `${a.entityType} #${a.entityId}`,
+        user: a.userId ? `User #${a.userId}` : 'Anonymous',
+        time: new Date(a.created_at).toLocaleString(),
+      }))
+  }, [analytics])
 
   return (
     <div className="flex h-screen bg-gray-100">

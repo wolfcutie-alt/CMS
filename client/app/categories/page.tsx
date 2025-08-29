@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useCategories } from "@/hooks/useCategory"
 
 export default function CategoriesPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -32,58 +33,12 @@ export default function CategoriesPage() {
     color: "#3b82f6",
   })
 
-  const categories = [
-    {
-      id: 1,
-      name: "Tutorial",
-      slug: "tutorial",
-      description: "Step-by-step guides and tutorials",
-      color: "#3b82f6",
-      postCount: 12,
-      createdAt: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Guide",
-      slug: "guide",
-      description: "Comprehensive guides and documentation",
-      color: "#10b981",
-      postCount: 8,
-      createdAt: "2024-01-14",
-    },
-    {
-      id: 3,
-      name: "Opinion",
-      slug: "opinion",
-      description: "Editorial content and opinions",
-      color: "#f59e0b",
-      postCount: 5,
-      createdAt: "2024-01-13",
-    },
-    {
-      id: 4,
-      name: "Technical",
-      slug: "technical",
-      description: "Technical deep-dives and analysis",
-      color: "#8b5cf6",
-      postCount: 15,
-      createdAt: "2024-01-12",
-    },
-    {
-      id: 5,
-      name: "News",
-      slug: "news",
-      description: "Latest news and updates",
-      color: "#ef4444",
-      postCount: 3,
-      createdAt: "2024-01-11",
-    },
-  ]
+  const { categories, loading, error } = useCategories();
 
   const filteredCategories = categories.filter(
     (category) =>
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      category.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const handleSubmit = (e: React.FormEvent) => {

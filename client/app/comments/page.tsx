@@ -10,6 +10,7 @@ import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useComments } from "@/hooks/useComment"
 
 export default function CommentsPage() {
   const [searchTerm, setSearchTerm] = useState("")

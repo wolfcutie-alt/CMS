@@ -13,6 +13,7 @@ import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useSetting } from "@/hooks/useSetting"
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
