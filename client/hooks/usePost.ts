@@ -9,22 +9,22 @@ export const usePosts = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const token = localStorage.getItem('authToken'); 
-    
+                const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/post`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                     },
                 });
-    
-                if (response.ok) {
-                    const data: Post[] = await response.json();
-                    setPosts(data);
-                } else {
-                    throw new Error('Failed to fetch posts');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
                 }
+
+                const data: Post[] = await response.json();
+                setPosts(Array.isArray(data) ? data : []);
             } catch (err) {
                 setError(err as Error);
             } finally {

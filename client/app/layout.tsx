@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { AuthGuard } from "@/components/auth-guard"
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: "CMS Admin - Content Management System",
@@ -28,6 +29,7 @@ html {
       </head>
       <body>
         <AuthGuard>{children}</AuthGuard>
+        <Toaster />
       </body>
     </html>
   )

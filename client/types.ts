@@ -52,6 +52,9 @@ export interface Category {
   
     // TIMESTAMP, may be null if not set
     updated_at?: string | Date | null
+  
+    // Computed field for post count
+    posts_count?: number
 }
   
 

@@ -9,21 +9,22 @@ export const useComments = () => {
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                const token = localStorage.getItem('authToken');
+                const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comment`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                     },
                 });
 
-                if (response.ok) {
-                    const data: Comment[] = await response.json();
-                } else {
-                    throw new Error("Failed to fetch data");
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
                 }
+
+                const data: Comment[] = await response.json();
+                setComments(Array.isArray(data) ? data : []);
             } catch (err) {
                 setError(err as Error);
             } finally {
@@ -32,7 +33,7 @@ export const useComments = () => {
         }
 
         fetchComments();
-    })
+    }, [])
 
     return { comments, loading, error }
 

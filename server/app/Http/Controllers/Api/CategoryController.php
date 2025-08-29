@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -29,8 +30,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::orderBy("created_at","desc")->paginate(10);
-        return response()->json($categories);
+        $categories = Category::withCount('posts')->orderBy("created_at","desc")->get();
+        return response()->json(['data' => $categories]);
     }
 
     /**
@@ -54,7 +55,14 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $category = Category::create($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'slug' => 'required|string|max:100|unique:categories,slug',
+            'description' => 'nullable|string',
+            'color' => 'nullable|string|max:7|regex:/^#[0-9A-F]{6}$/i',
+        ]);
+
+        $category = Category::create($validated);
         return response()->json($category, 201);
     }
 
@@ -78,7 +86,7 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $category = Category::findOrFail($id);
+        $category = Category::withCount('posts')->findOrFail($id);
         return response()->json($category);
     }
 
@@ -103,7 +111,15 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
-        $category->update($request->all());
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'slug' => ['required', 'string', 'max:100', Rule::unique('categories', 'slug')->ignore($id)],
+            'description' => 'nullable|string',
+            'color' => 'nullable|string|max:7|regex:/^#[0-9A-F]{6}$/i',
+        ]);
+
+        $category->update($validated);
         return response()->json($category, 200);
     }
 
@@ -128,7 +144,15 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
+        
+        // Check if category has posts
+        if ($category->posts()->count() > 0) {
+            return response()->json([
+                'message' => 'Cannot delete category that has posts. Please move or delete the posts first.'
+            ], 422);
+        }
+        
         $category->delete();
-        return response()->json($category,204);
+        return response()->json(['message' => 'Category deleted successfully'], 204);
     }
 }

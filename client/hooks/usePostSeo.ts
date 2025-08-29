@@ -9,21 +9,22 @@ export const usePostSeo = () => {
     useEffect(() => {
         const fetchPostSeo = async () => {
             try {
-                const token = localStorage.getItem("authToken");
+                const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/postseo`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                     },
                 });
 
-                if (response.ok) {
-                    const data: PostSeo[] = await response.json();
-                } else {
-                    throw new Error("Failed to fetch data");
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
                 }
+
+                const data: PostSeo[] = await response.json();
+                setPostSeo(Array.isArray(data) ? data : []);
             } catch (err) {
                 setError(err as Error)
             } finally {
@@ -32,7 +33,7 @@ export const usePostSeo = () => {
         }
 
         fetchPostSeo();
-    })
+    }, [])
 
     return { postSeo, loading, error }
 }
