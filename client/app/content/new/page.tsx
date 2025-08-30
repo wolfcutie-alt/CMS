@@ -28,7 +28,7 @@ export default function NewPostPage() {
     slug: "",
     excerpt: "",
     content: "",
-    categoryId: "",
+    categoryId: "none",
     status: "draft" as Post['status'],
     featuredImage: ""
   })
@@ -73,7 +73,7 @@ export default function NewPostPage() {
       newErrors.slug = "Slug is required"
     }
 
-    if (formData.categoryId && !categories.find(cat => cat.id.toString() === formData.categoryId)) {
+    if (formData.categoryId && formData.categoryId !== "none" && !categories.find(cat => cat.id.toString() === formData.categoryId)) {
       newErrors.categoryId = "Invalid category selected"
     }
 
@@ -96,7 +96,7 @@ export default function NewPostPage() {
       const postData = {
         ...formData,
         status: publish ? "published" : formData.status,
-        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        categoryId: formData.categoryId && formData.categoryId !== "none" ? parseInt(formData.categoryId) : null,
         authorId: 1, // This should come from auth context
         publishedAt: publish ? new Date().toISOString() : null,
       }
@@ -243,7 +243,7 @@ export default function NewPostPage() {
                           <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select category"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Category</SelectItem>
+                          <SelectItem value="none">No Category</SelectItem>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name}

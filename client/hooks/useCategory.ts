@@ -31,6 +31,74 @@ export const useCategories = () => {
         }
     };
 
+    const createCategory = async (categoryData: Partial<Category>) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
+                method: 'POST',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(categoryData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to create category');
+            }
+
+            await fetchCategories();
+            return { success: true };
+        } catch (err) {
+            const errorMessage = handleApiError(err);
+            return { success: false, error: new Error(errorMessage) };
+        }
+    };
+
+    const updateCategory = async (id: number, categoryData: Partial<Category>) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/${id}`, {
+                method: 'PUT',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(categoryData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to update category');
+            }
+
+            await fetchCategories();
+            return { success: true };
+        } catch (err) {
+            const errorMessage = handleApiError(err);
+            return { success: false, error: new Error(errorMessage) };
+        }
+    };
+
+    const deleteCategory = async (id: number) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to delete category');
+            }
+
+            await fetchCategories();
+            return { success: true };
+        } catch (err) {
+            const errorMessage = handleApiError(err);
+            return { success: false, error: new Error(errorMessage) };
+        }
+    };
+
     useEffect(() => {
         fetchCategories();
     }, []);
@@ -39,6 +107,9 @@ export const useCategories = () => {
         categories, 
         loading, 
         error, 
-        refetch: fetchCategories
+        refetch: fetchCategories,
+        createCategory,
+        updateCategory,
+        deleteCategory
     }
 }

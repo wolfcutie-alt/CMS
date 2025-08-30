@@ -275,9 +275,8 @@ function ViewPostContent({ postId }: { postId: number }) {
   )
 }
 
-export default function ViewPostPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params)
-  const postId = parseInt(resolvedParams.id)
-  
+// ✅ params is not a Promise, just an object
+export default function ViewPostPage({ params }: { params: { id: string } }) {
+  const postId = parseInt(params.id, 10)
   return <ViewPostContent postId={postId} />
 }

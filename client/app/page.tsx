@@ -1,49 +1,71 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, FileText, Users, Eye, TrendingUp } from "lucide-react"
+import { Plus, FileText, Users, Eye, TrendingUp, MessageSquare} from "lucide-react"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
+import { useAnalytics } from "@/hooks/useAnalytic"
+import { usePosts } from "@/hooks/usePost"
+import { useMemo } from "react"
 
 export default function Dashboard() {
-  const stats = [
-    {
-      title: "Total Posts",
-      value: "24",
-      description: "+2 from last month",
-      icon: FileText,
-      color: "bg-blue-500",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-600",
-    },
-    {
-      title: "Total Views",
-      value: "12,543",
-      description: "+15% from last month",
-      icon: Eye,
-      color: "bg-green-500",
-      bgColor: "bg-green-50",
-      textColor: "text-green-600",
-    },
-    {
-      title: "Active Users",
-      value: "573",
-      description: "+8% from last month",
-      icon: Users,
-      color: "bg-purple-500",
-      bgColor: "bg-purple-50",
-      textColor: "text-purple-600",
-    },
-    {
-      title: "Engagement",
-      value: "89%",
-      description: "+3% from last month",
-      icon: TrendingUp,
-      color: "bg-orange-500",
-      bgColor: "bg-orange-50",
-      textColor: "text-orange-600",
-    },
-  ]
+  const { analytics, loading, error } = useAnalytics()
+
+  const stats = useMemo(() => {
+    const totalViews = analytics.filter(a => a.type === 'view').length
+    const uniqueVisitors = new Set(analytics.map(a => (a.userId ?? a.ipAddress) || `${a.ipAddress}`)).size
+    const publishedPosts = analytics.filter(a => a.type === 'post').length
+    const comments = analytics.filter(a => a.type === 'comment').length
+
+    return [
+      {
+        title: "Total Views",
+        value: totalViews.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: Eye,
+        bgColor: "bg-gradient-to-r from-blue-500 to-cyan-500",
+        textColor: "text-blue-600",
+        description: "Total page views",
+        color: "bg-blue-500",
+      },
+      {
+        title: "Unique Visitors",
+        value: uniqueVisitors.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: Users,
+        bgColor: "bg-gradient-to-r from-green-500 to-emerald-500",
+        textColor: "text-green-600",
+        description: "Unique visitors",
+        color: "bg-green-500",
+      },
+      {
+        title: "Published Posts",
+        value: publishedPosts.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: FileText,
+        bgColor: "bg-gradient-to-r from-purple-500 to-violet-500",
+        textColor: "text-purple-600",
+        description: "Published posts",
+        color: "bg-purple-500",
+      },
+      {
+        title: "Comments",
+        value: comments.toLocaleString(),
+        change: "—",
+        trend: "up",
+        icon: MessageSquare,
+        bgColor: "bg-gradient-to-r from-orange-500 to-red-500",
+        textColor: "text-orange-600",
+        description: "Total comments",
+        color: "bg-orange-500",
+      },
+    ] as const
+  }, [analytics])
 
   const recentPosts = [
     {

@@ -40,7 +40,7 @@ function EditPostContent({ postId }: { postId: number }) {
     slug: "",
     excerpt: "",
     content: "",
-    categoryId: "",
+    categoryId: "none",
     status: "draft" as Post['status'],
     featuredImage: ""
   })
@@ -87,7 +87,7 @@ function EditPostContent({ postId }: { postId: number }) {
       newErrors.slug = "Slug is required"
     }
 
-    if (formData.categoryId && !categories.find(cat => cat.id.toString() === formData.categoryId)) {
+    if (formData.categoryId && formData.categoryId !== "none" && !categories.find(cat => cat.id.toString() === formData.categoryId)) {
       newErrors.categoryId = "Invalid category selected"
     }
 
@@ -110,7 +110,7 @@ function EditPostContent({ postId }: { postId: number }) {
       const postData = {
         ...formData,
         status: publish ? "published" : formData.status,
-        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        categoryId: formData.categoryId && formData.categoryId !== "none" ? parseInt(formData.categoryId) : null,
         publishedAt: publish ? new Date().toISOString() : post?.publishedAt,
       }
 
@@ -164,7 +164,7 @@ function EditPostContent({ postId }: { postId: number }) {
           slug: postData.slug,
           excerpt: postData.excerpt || "",
           content: postData.content,
-          categoryId: postData.categoryId?.toString() || "",
+          categoryId: postData.categoryId?.toString() || "none",
           status: postData.status,
           featuredImage: postData.featuredImage || ""
         })
@@ -350,7 +350,7 @@ function EditPostContent({ postId }: { postId: number }) {
                           <SelectValue placeholder={categoriesLoading ? "Loading..." : "Select category"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Category</SelectItem>
+                          <SelectItem value="none">No Category</SelectItem>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id.toString()}>
                               {category.name}
