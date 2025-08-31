@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+// use Intervention\Image\Facades\Image; // Uncomment after installing intervention/image package
 
 class MediaController extends Controller
 {
@@ -29,8 +34,12 @@ class MediaController extends Controller
      */
     public function index()
     {
-        $media = Media::orderBy("id","desc")->paginate(10);
-        return response()->json($media);
+        try {
+            $media = Media::orderBy("id", "desc")->get();
+            return response()->json($media);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to fetch media'], 500);
+        }
     }
 
     /**
@@ -54,8 +63,85 @@ class MediaController extends Controller
      */
     public function store(Request $request)
     {
-        $media = Media::create($request->all());
-        return response()->json($media);
+        try {
+            $validator = Validator::make($request->all(), [
+                'file' => 'required|file|max:10240', // 10MB max
+                'name' => 'required|string|max:255',
+                'type' => 'required|string|in:image,video,audio,document,archive',
+                'alt' => 'nullable|string|max:255',
+                'caption' => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $file = $request->file('file');
+            $originalName = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType();
+            $size = $file->getSize();
+            
+            // Generate unique filename
+            $extension = $file->getClientOriginalExtension();
+            $filename = Str::random(40) . '.' . $extension;
+            
+            // Store file
+            $path = $file->storeAs('media', $filename, 'public');
+            $url = Storage::url($path);
+            
+            // Generate thumbnail for images (simple copy for now)
+            $thumbnailUrl = null;
+            if ($request->type === 'image') {
+                try {
+                    $thumbnailFilename = 'thumb_' . $filename;
+                    $thumbnailPath = 'media/' . $thumbnailFilename;
+                    
+                    // For now, just copy the original file as thumbnail
+                    // TODO: Install intervention/image package for proper thumbnail generation
+                    Storage::disk('public')->copy($path, $thumbnailPath);
+                    $thumbnailUrl = Storage::url($thumbnailPath);
+                    
+                    Log::info('Thumbnail created (copy)', [
+                        'original' => $path,
+                        'thumbnail' => $thumbnailPath,
+                        'thumbnail_url' => $thumbnailUrl
+                    ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to create thumbnail', [
+                        'error' => $e->getMessage(),
+                        'file' => $path
+                    ]);
+                }
+            }
+            
+            // Debug information
+            Log::info('File upload debug', [
+                'original_name' => $originalName,
+                'stored_path' => $path,
+                'generated_url' => $url,
+                'thumbnail_url' => $thumbnailUrl,
+                'file_exists' => Storage::disk('public')->exists($path),
+                'full_path' => Storage::disk('public')->path($path)
+            ]);
+            
+            // Create media record
+            $media = Media::create([
+                'name' => $request->name,
+                'originalName' => $originalName,
+                'type' => $request->type,
+                'mimeType' => $mimeType,
+                'size' => $size,
+                'url' => $url,
+                'thumbnailUrl' => $thumbnailUrl,
+                'alt' => $request->alt,
+                'caption' => $request->caption,
+                'uploadedBy' => 1, // Default to user 1 for now
+            ]);
+
+            return response()->json($media, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to upload media: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -78,7 +164,11 @@ class MediaController extends Controller
      */
     public function show(Media $media)
     {
-        return response()->json($media);
+        try {
+            return response()->json($media);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to fetch media'], 500);
+        }
     }
 
     /**
@@ -101,8 +191,24 @@ class MediaController extends Controller
      */
     public function update(Request $request, Media $media)
     {
-        $media->update($request->all());
-        return response()->json($media);
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'sometimes|required|string|max:255',
+                'type' => 'sometimes|required|string|in:image,video,audio,document,archive',
+                'alt' => 'nullable|string|max:255',
+                'caption' => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $media->update($request->only(['name', 'type', 'alt', 'caption']));
+            
+            return response()->json($media);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to update media: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -125,7 +231,34 @@ class MediaController extends Controller
      */
     public function destroy(Media $media)
     {
-        $media->delete();
-        return response()->json(null,204);
+        try {
+            // Delete original file from storage
+            $path = str_replace('/storage/', '', $media->url);
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+                Log::info('Original file deleted', ['path' => $path]);
+            }
+            
+            // Delete thumbnail file if it exists
+            if ($media->thumbnailUrl) {
+                $thumbnailPath = str_replace('/storage/', '', $media->thumbnailUrl);
+                if (Storage::disk('public')->exists($thumbnailPath)) {
+                    Storage::disk('public')->delete($thumbnailPath);
+                    Log::info('Thumbnail file deleted', ['path' => $thumbnailPath]);
+                }
+            }
+            
+            // Delete database record
+            $media->delete();
+            Log::info('Media record deleted from database', ['id' => $media->id]);
+            
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            Log::error('Failed to delete media', [
+                'id' => $media->id,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json(['message' => 'Failed to delete media: ' . $e->getMessage()], 500);
+        }
     }
 }

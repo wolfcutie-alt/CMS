@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,73 +18,43 @@ import {
   FileText,
   Video,
   Music,
+  Edit,
+  Loader2,
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useMedias } from "@/hooks/useMedia"
+import { MediaModal } from "@/components/media-modal"
+import { DeleteConfirmation } from "@/components/delete-confirmation"
+import { Media } from "@/types"
+import { formatDate, formatFileSize } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 export default function MediaPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null)
+  const [mediaToDelete, setMediaToDelete] = useState<Media | null>(null)
 
-  const mediaFiles = [
-    {
-      id: 1,
-      name: "hero-banner.jpg",
-      type: "image",
-      size: "2.4 MB",
-      dimensions: "1920x1080",
-      uploadDate: "2024-01-15",
-      url: "/placeholder.svg?height=200&width=300&text=Hero+Banner",
-    },
-    {
-      id: 2,
-      name: "product-demo.mp4",
-      type: "video",
-      size: "15.2 MB",
-      duration: "2:34",
-      uploadDate: "2024-01-14",
-      url: "/placeholder.svg?height=200&width=300&text=Video+Demo",
-    },
-    {
-      id: 3,
-      name: "user-guide.pdf",
-      type: "document",
-      size: "1.8 MB",
-      pages: "24",
-      uploadDate: "2024-01-13",
-      url: "/placeholder.svg?height=200&width=300&text=PDF+Document",
-    },
-    {
-      id: 4,
-      name: "background-music.mp3",
-      type: "audio",
-      size: "4.1 MB",
-      duration: "3:45",
-      uploadDate: "2024-01-12",
-      url: "/placeholder.svg?height=200&width=300&text=Audio+File",
-    },
-    {
-      id: 5,
-      name: "logo-variants.zip",
-      type: "archive",
-      size: "892 KB",
-      files: "12",
-      uploadDate: "2024-01-11",
-      url: "/placeholder.svg?height=200&width=300&text=Archive+File",
-    },
-    {
-      id: 6,
-      name: "team-photo.jpg",
-      type: "image",
-      size: "3.1 MB",
-      dimensions: "2400x1600",
-      uploadDate: "2024-01-10",
-      url: "/placeholder.svg?height=200&width=300&text=Team+Photo",
-    },
-  ]
+  const { medias, loading, error, createMedia, updateMedia, deleteMedia } = useMedias()
+  const { toast } = useToast()
+
+  // Debug thumbnails in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && medias.length > 0) {
+      console.log('Media data:', medias.map(m => ({
+        id: m.id,
+        name: m.name,
+        type: m.type,
+        url: m.url,
+        thumbnailUrl: m.thumbnailUrl
+      })))
+    }
+  }, [medias])
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -114,11 +84,163 @@ export default function MediaPage() {
     }
   }
 
-  const filteredFiles = mediaFiles.filter((file) => {
-    const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = typeFilter === "all" || file.type === typeFilter
+  const filteredMedias = medias.filter((media) => {
+    const matchesSearch = media.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (media.alt && media.alt.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (media.caption && media.caption.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesType = typeFilter === "all" || media.type === typeFilter
     return matchesSearch && matchesType
   })
+
+  const handleCreateMedia = async (data: FormData) => {
+    try {
+      await createMedia(data)
+      toast({
+        title: "Success",
+        description: "Media uploaded successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to upload media",
+        variant: "destructive",
+      })
+      throw error
+    }
+  }
+
+  const handleUpdateMedia = async (data: FormData) => {
+    if (!selectedMedia) return
+    
+    try {
+      // Convert FormData to JSON for update
+      const updateData: Partial<Media> = {
+        name: data.get('name') as string,
+        alt: data.get('alt') as string,
+        caption: data.get('caption') as string,
+        type: data.get('type') as string,
+      }
+      
+      await updateMedia(selectedMedia.id, updateData)
+      toast({
+        title: "Success",
+        description: "Media updated successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update media",
+        variant: "destructive",
+      })
+      throw error
+    }
+  }
+
+  const handleDeleteMedia = async () => {
+    if (!mediaToDelete) return
+    
+    try {
+      console.log('Attempting to delete media:', mediaToDelete.id)
+      const result = await deleteMedia(mediaToDelete.id)
+      console.log('Delete result:', result)
+      toast({
+        title: "Success",
+        description: "Media deleted successfully",
+      })
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete media",
+        variant: "destructive",
+      })
+      throw error
+    }
+  }
+
+  const openCreateModal = () => {
+    setSelectedMedia(null)
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (media: Media) => {
+    setSelectedMedia(media)
+    setIsModalOpen(true)
+  }
+
+  const openDeleteModal = (media: Media) => {
+    setMediaToDelete(media)
+    setIsDeleteModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedMedia(null)
+  }
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+    setMediaToDelete(null)
+  }
+
+  const handleDownload = (media: Media) => {
+    try {
+      // Create a temporary link to download the file
+      const link = document.createElement('a')
+      
+      // Ensure the URL is absolute
+      const url = media.url.startsWith('http') ? media.url : `${window.location.origin}${media.url}`
+      
+      link.href = url
+      link.download = media.name
+      link.target = '_blank'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      toast({
+        title: "Download Error",
+        description: "Failed to download file. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleView = (media: Media) => {
+    try {
+      // Ensure the URL is absolute
+      const url = media.url.startsWith('http') ? media.url : `${window.location.origin}${media.url}`
+      window.open(url, '_blank')
+    } catch (error) {
+      toast({
+        title: "View Error",
+        description: "Failed to open file. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-gray-100">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-purple-50 via-white to-pink-50 p-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center py-8">
+                <p className="text-red-500">Error loading media: {error.message}</p>
+                <Button onClick={() => window.location.reload()} className="mt-4">
+                  Retry
+                </Button>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -132,7 +254,10 @@ export default function MediaPage() {
                 <h1 className="text-3xl font-bold text-gray-900">Media Library</h1>
                 <p className="text-gray-600">Manage your images, videos, and documents</p>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg">
+              <Button 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg"
+                onClick={openCreateModal}
+              >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
               </Button>
@@ -163,6 +288,7 @@ export default function MediaPage() {
                         <SelectItem value="video">Videos</SelectItem>
                         <SelectItem value="audio">Audio</SelectItem>
                         <SelectItem value="document">Documents</SelectItem>
+                        <SelectItem value="archive">Archives</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -186,90 +312,80 @@ export default function MediaPage() {
               </CardContent>
             </Card>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                <span className="ml-2 text-gray-600">Loading media...</span>
+              </div>
+            )}
+
             {/* Media Grid/List */}
-            {viewMode === "grid" ? (
+            {!loading && viewMode === "grid" && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredFiles.map((file) => (
-                  <Card key={file.id} className="group hover:shadow-lg transition-shadow">
+                {filteredMedias.map((media) => (
+                  <Card key={media.id} className="group hover:shadow-lg transition-shadow">
                     <CardContent className="p-4">
                       <div className="aspect-video bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                        <img
-                          src={file.url || "/placeholder.svg"}
-                          alt={file.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
+                        {media.type === "image" ? (
+                          <div>
+                            <img
+                              src={media.thumbnailUrl ? `http://localhost:8000${media.thumbnailUrl}` : `http://localhost:8000${media.url}` || "/placeholder.svg"}
+                              alt={media.alt || media.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              onError={(e) => {
+                                e.currentTarget.src = "/placeholder.svg"
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            {getFileIcon(media.type)}
+                            <span className="ml-2 text-sm text-gray-600">{media.name}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          {getFileIcon(file.type)}
-                          <h3 className="font-medium truncate">{file.name}</h3>
+                          {getFileIcon(media.type)}
+                          <h3 className="font-medium truncate">{media.name}</h3>
                         </div>
                         <div className="flex items-center justify-between">
-                          <Badge className={getFileTypeColor(file.type)}>{file.type}</Badge>
-                          <span className="text-sm text-gray-500">{file.size}</span>
+                          <Badge className={getFileTypeColor(media.type)}>{media.type}</Badge>
+                          <span className="text-sm text-gray-500">{formatFileSize(media.size)}</span>
                         </div>
                         <div className="text-xs text-gray-500">
-                          {file.dimensions && <span>{file.dimensions} • </span>}
-                          {file.duration && <span>{file.duration} • </span>}
-                          {file.pages && <span>{file.pages} pages • </span>}
-                          {file.files && <span>{file.files} files • </span>}
-                          <span>{file.uploadDate}</span>
+                          {media.uploadedAt ? formatDate(media.uploadedAt) : 'Date not available'}
                         </div>
                         <div className="flex gap-2 pt-2">
-                          <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1 bg-transparent"
+                            onClick={() => handleView(media)}
+                          >
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownload(media)}
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="w-4 h-4" />
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openEditModal(media)}
+                          >
+                            <Edit className="w-4 h-4" />
                           </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredFiles.map((file) => (
-                  <Card key={file.id}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                            <img
-                              src={file.url || "/placeholder.svg"}
-                              alt={file.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              {getFileIcon(file.type)}
-                              <h3 className="font-medium">{file.name}</h3>
-                              <Badge className={getFileTypeColor(file.type)}>{file.type}</Badge>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {file.size} • {file.uploadDate}
-                              {file.dimensions && ` • ${file.dimensions}`}
-                              {file.duration && ` • ${file.duration}`}
-                              {file.pages && ` • ${file.pages} pages`}
-                              {file.files && ` • ${file.files} files`}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openDeleteModal(media)}
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -280,13 +396,96 @@ export default function MediaPage() {
               </div>
             )}
 
-            {filteredFiles.length === 0 && (
+            {!loading && viewMode === "list" && (
+              <div className="space-y-4">
+                {filteredMedias.map((media) => (
+                  <Card key={media.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                            {media.type === "image" ? (
+                              <img
+                                src={media.thumbnailUrl ? `http://localhost:8000${media.thumbnailUrl}` : `http://localhost:8000${media.url}` || "/placeholder.svg"}
+                                alt={media.alt || media.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = "/placeholder.svg"
+                                }}
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                {getFileIcon(media.type)}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              {getFileIcon(media.type)}
+                              <h3 className="font-medium">{media.name}</h3>
+                              <Badge className={getFileTypeColor(media.type)}>{media.type}</Badge>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {formatFileSize(media.size)} • {formatDate(media.uploadedAt)}
+                              {media.alt && ` • ${media.alt}`}
+                            </div>
+                            {media.caption && (
+                              <div className="text-sm text-gray-600 mt-1">
+                                {media.caption}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleView(media)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownload(media)}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openEditModal(media)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => openDeleteModal(media)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!loading && filteredMedias.length === 0 && (
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
                     <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No files found matching your criteria.</p>
-                    <Button className="mt-4">
+                    <p className="text-gray-500">
+                      {searchTerm || typeFilter !== "all" 
+                        ? "No files found matching your criteria." 
+                        : "No media files uploaded yet."}
+                    </p>
+                    <Button className="mt-4" onClick={openCreateModal}>
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Your First File
                     </Button>
@@ -297,6 +496,24 @@ export default function MediaPage() {
           </div>
         </main>
       </div>
+
+      {/* Modals */}
+      <MediaModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSubmit={selectedMedia ? handleUpdateMedia : handleCreateMedia}
+        media={selectedMedia}
+        isEdit={!!selectedMedia}
+      />
+
+      <DeleteConfirmation
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteMedia}
+        title="Delete Media"
+        description="Are you sure you want to delete this media file? This action cannot be undone."
+        itemName={mediaToDelete?.name}
+      />
     </div>
   )
 }
