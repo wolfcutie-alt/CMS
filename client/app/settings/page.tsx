@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,8 +14,12 @@ import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useSetting } from "@/hooks/useSetting"
+import { useToast } from "@/hooks/use-toast"
 
 export default function SettingsPage() {
+  const { settings: stored, loading, error, saveSettings, refetch } = useSetting()
+  const { toast } = useToast()
+
   const [settings, setSettings] = useState({
     // General Settings
     siteName: "CMS Admin",
@@ -51,9 +55,76 @@ export default function SettingsPage() {
     systemNotifications: true,
   })
 
-  const handleSave = (section: string) => {
-    console.log(`Saving ${section} settings:`, settings)
-    alert(`${section} settings saved successfully!`)
+  useEffect(() => {
+    if (!loading && stored) {
+      setSettings(prev => ({
+        ...prev,
+        siteName: stored.siteName ?? prev.siteName,
+        siteDescription: stored.siteDescription ?? prev.siteDescription,
+        siteUrl: stored.siteUrl ?? prev.siteUrl,
+        adminEmail: stored.adminEmail ?? prev.adminEmail,
+        timezone: stored.timezone ?? prev.timezone,
+        dateFormat: stored.dateFormat ?? prev.dateFormat,
+
+        postsPerPage: String(stored.postsPerPage ?? prev.postsPerPage),
+        allowComments: Boolean(stored.allowComments ?? prev.allowComments),
+        moderateComments: Boolean(stored.moderateComments ?? prev.moderateComments),
+        allowRegistration: Boolean(stored.allowRegistration ?? prev.allowRegistration),
+        defaultUserRole: stored.defaultUserRole ?? prev.defaultUserRole,
+
+        emailProvider: stored.emailProvider ?? prev.emailProvider,
+        smtpHost: stored.smtpHost ?? prev.smtpHost,
+        smtpPort: String(stored.smtpPort ?? prev.smtpPort),
+        smtpUsername: stored.smtpUsername ?? prev.smtpUsername,
+        smtpPassword: stored.smtpPassword ?? prev.smtpPassword,
+
+        enableTwoFactor: Boolean(stored.enableTwoFactor ?? prev.enableTwoFactor),
+        sessionTimeout: String(stored.sessionTimeout ?? prev.sessionTimeout),
+        maxLoginAttempts: String(stored.maxLoginAttempts ?? prev.maxLoginAttempts),
+
+        emailNotifications: Boolean(stored.emailNotifications ?? prev.emailNotifications),
+        commentNotifications: Boolean(stored.commentNotifications ?? prev.commentNotifications),
+        newUserNotifications: Boolean(stored.newUserNotifications ?? prev.newUserNotifications),
+        systemNotifications: Boolean(stored.systemNotifications ?? prev.systemNotifications),
+      }))
+    }
+  }, [loading, stored])
+
+  const handleSave = async (section: string) => {
+    try {
+      await saveSettings({
+        siteName: settings.siteName,
+        siteDescription: settings.siteDescription,
+        siteUrl: settings.siteUrl,
+        adminEmail: settings.adminEmail,
+        timezone: settings.timezone,
+        dateFormat: settings.dateFormat,
+
+        postsPerPage: Number(settings.postsPerPage),
+        allowComments: settings.allowComments,
+        moderateComments: settings.moderateComments,
+        allowRegistration: settings.allowRegistration,
+        defaultUserRole: settings.defaultUserRole,
+
+        emailProvider: settings.emailProvider,
+        smtpHost: settings.smtpHost,
+        smtpPort: Number(settings.smtpPort),
+        smtpUsername: settings.smtpUsername,
+        smtpPassword: settings.smtpPassword,
+
+        enableTwoFactor: settings.enableTwoFactor,
+        sessionTimeout: Number(settings.sessionTimeout),
+        maxLoginAttempts: Number(settings.maxLoginAttempts),
+
+        emailNotifications: settings.emailNotifications,
+        commentNotifications: settings.commentNotifications,
+        newUserNotifications: settings.newUserNotifications,
+        systemNotifications: settings.systemNotifications,
+      })
+      toast({ title: "Success", description: `${section} settings saved successfully!` })
+    } catch (e) {
+      toast({ title: "Error", description: e instanceof Error ? e.message : 'Failed to save settings', variant: 'destructive' })
+    }
   }
 
   const handleInputChange = (key: string, value: any) => {
@@ -70,6 +141,9 @@ export default function SettingsPage() {
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
               <p className="text-gray-600">Configure your CMS preferences and options</p>
+              {error && (
+                <p className="text-red-600 mt-2">{error.message}</p>
+              )}
             </div>
 
             <Tabs defaultValue="general" className="space-y-6">

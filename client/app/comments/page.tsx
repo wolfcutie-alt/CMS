@@ -56,9 +56,9 @@ export default function CommentsPage() {
 
   const filteredComments = comments.filter((comment) => {
     const matchesSearch =
-      comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comment.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (comment.post?.title && comment.post.title.toLowerCase().includes(searchTerm.toLowerCase()))
+      (comment.content || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (comment.author || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (comment.post?.title || "").toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || comment.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -167,8 +167,15 @@ export default function CommentsPage() {
     return new Date(dateString).toLocaleString()
   }
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase()
+  const getInitials = (name?: string) => {
+    const safe = (name || '').trim()
+    if (!safe) return '?'
+    return safe
+      .split(' ')
+      .filter(Boolean)
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
   }
 
   return (

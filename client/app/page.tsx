@@ -12,6 +12,7 @@ import { useMemo } from "react"
 
 export default function Dashboard() {
   const { analytics, loading, error } = useAnalytics()
+  const { posts, loading: postsLoading } = usePosts()
 
   const stats = useMemo(() => {
     const totalViews = analytics.filter(a => a.type === 'view').length
@@ -67,29 +68,21 @@ export default function Dashboard() {
     ] as const
   }, [analytics])
 
-  const recentPosts = [
-    {
-      id: 1,
-      title: "Getting Started with Next.js 15",
-      status: "Published",
-      date: "2024-01-15",
-      views: 1234,
-    },
-    {
-      id: 2,
-      title: "Building Modern Web Applications",
-      status: "Draft",
-      date: "2024-01-14",
-      views: 0,
-    },
-    {
-      id: 3,
-      title: "The Future of Web Development",
-      status: "Published",
-      date: "2024-01-13",
-      views: 856,
-    },
-  ]
+  const recentPosts = useMemo(() => {
+    const items = posts.map(p => {
+      const publishedOrCreated = p.publishedAt || p.created_at
+      const sortDate = new Date(publishedOrCreated).getTime()
+      return {
+        id: p.id,
+        title: p.title,
+        status: p.status === 'published' ? 'Published' : p.status === 'draft' ? 'Draft' : 'Archived',
+        date: new Date(publishedOrCreated).toISOString().slice(0, 10),
+        views: p.views ?? 0,
+        sortDate,
+      }
+    })
+    return items.sort((a, b) => b.sortDate - a.sortDate).slice(0, 5).map(({ sortDate, ...rest }) => rest)
+  }, [posts])
 
   return (
     <div className="flex h-screen bg-gray-100">

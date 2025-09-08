@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import { Search, Filter, Edit, Trash2, User, Mail, Calendar, Shield, UserPlus } from "lucide-react"
+import { Search, Filter, Edit, Trash2, User, Mail, UserPlus, Shield } from "lucide-react"
 import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useUsers } from "@/hooks/useUser"
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -32,70 +33,10 @@ export default function UsersPage() {
     lastName: "",
     email: "",
     role: "editor",
+    password: "",
   })
 
-  const users = [
-    {
-      id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@example.com",
-      role: "admin",
-      avatar: "/placeholder.svg?height=40&width=40&text=JD",
-      status: "active",
-      lastLogin: "2024-01-15 10:30",
-      postsCount: 12,
-      joinDate: "2023-06-15",
-    },
-    {
-      id: 2,
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane@example.com",
-      role: "editor",
-      avatar: "/placeholder.svg?height=40&width=40&text=JS",
-      status: "active",
-      lastLogin: "2024-01-14 15:45",
-      postsCount: 8,
-      joinDate: "2023-08-22",
-    },
-    {
-      id: 3,
-      firstName: "Mike",
-      lastName: "Johnson",
-      email: "mike@example.com",
-      role: "author",
-      avatar: "/placeholder.svg?height=40&width=40&text=MJ",
-      status: "inactive",
-      lastLogin: "2024-01-10 09:15",
-      postsCount: 5,
-      joinDate: "2023-11-03",
-    },
-    {
-      id: 4,
-      firstName: "Sarah",
-      lastName: "Wilson",
-      email: "sarah@example.com",
-      role: "editor",
-      avatar: "/placeholder.svg?height=40&width=40&text=SW",
-      status: "active",
-      lastLogin: "2024-01-13 14:20",
-      postsCount: 15,
-      joinDate: "2023-05-10",
-    },
-    {
-      id: 5,
-      firstName: "Alex",
-      lastName: "Brown",
-      email: "alex@example.com",
-      role: "author",
-      avatar: "/placeholder.svg?height=40&width=40&text=AB",
-      status: "pending",
-      lastLogin: "Never",
-      postsCount: 0,
-      joinDate: "2024-01-11",
-    },
-  ]
+  const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUsers(1, 20)
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -122,8 +63,28 @@ export default function UsersPage() {
         return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border border-gray-200"
     }
   }
+  
+  const normalizedUsers = useMemo(() => {
+    return users.map(u => {
+      const name = u.name || "";
+      const parts = name.split(" ");
+      const first = parts[0] || "";
+      const last = parts.slice(1).join(" ") || "";
+      return {
+        id: u.id,
+        firstName: first,
+        lastName: last,
+        name,
+        email: u.email,
+        role: (u as any).role || "author",
+        status: (u as any).status || "pending",
+        created_at: (u as any).created_at,
+        avatar: "/placeholder.svg?height=40&width=40&text=" + (first[0] || "U") + (last[0] || ""),
+      };
+    });
+  }, [users])
 
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = normalizedUsers.filter((user) => {
     const matchesSearch =
       `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -131,12 +92,22 @@ export default function UsersPage() {
     return matchesSearch && matchesRole
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Saving user:", formData)
-    setIsDialogOpen(false)
-    setEditingUser(null)
-    setFormData({ firstName: "", lastName: "", email: "", role: "editor" })
+    const name = `${formData.firstName} ${formData.lastName}`.trim()
+    try {
+      if (editingUser) {
+        await updateUser(editingUser.id, { name, email: formData.email, role: formData.role, ...(formData.password ? { password: formData.password } : {}) })
+      } else {
+        await createUser({ name, email: formData.email, password: formData.password, role: formData.role })
+      }
+      setIsDialogOpen(false)
+      setEditingUser(null)
+      setFormData({ firstName: "", lastName: "", email: "", role: "editor", password: "" })
+      refetch()
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const handleEdit = (user: any) => {
@@ -145,14 +116,20 @@ export default function UsersPage() {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      role: user.role,
+      role: "editor",
+      password: "",
     })
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (userId: number) => {
+  const handleDelete = async (userId: number) => {
     if (confirm("Are you sure you want to delete this user?")) {
-      console.log("Deleting user:", userId)
+      try {
+        await deleteUser(userId)
+        refetch()
+      } catch (err) {
+        console.error(err)
+      }
     }
   }
 
@@ -216,6 +193,19 @@ export default function UsersPage() {
                         required
                       />
                     </div>
+                    {!editingUser && (
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          placeholder="Minimum 8 characters"
+                          required
+                        />
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <Label htmlFor="role">Role</Label>
                       <Select
@@ -282,6 +272,20 @@ export default function UsersPage() {
             </Card>
 
             {/* Users List */}
+            {loading && (
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <div className="text-gray-600">Loading users...</div>
+                </CardContent>
+              </Card>
+            )}
+            {error && (
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <div className="text-red-600">{error.message}</div>
+                </CardContent>
+              </Card>
+            )}
             <div className="space-y-4">
               {filteredUsers.map((user) => (
                 <Card key={user.id}>
@@ -311,13 +315,10 @@ export default function UsersPage() {
                               <Mail className="w-4 h-4" />
                               {user.email}
                             </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              Joined {user.joinDate}
-                            </span>
-                            <span>{user.postsCount} posts</span>
+                            {user.created_at && (
+                              <span className="text-xs">Joined {new Date(user.created_at).toLocaleDateString()}</span>
+                            )}
                           </div>
-                          <div className="text-xs text-gray-400 mt-1">Last login: {user.lastLogin}</div>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -336,7 +337,7 @@ export default function UsersPage() {
               ))}
             </div>
 
-            {filteredUsers.length === 0 && (
+            {!loading && filteredUsers.length === 0 && (
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center py-8">

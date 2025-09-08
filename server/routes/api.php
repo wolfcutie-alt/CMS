@@ -20,4 +20,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('postmedia', App\Http\Controllers\Api\PostMediaController::class);
     Route::apiResource('postseo', App\Http\Controllers\Api\PostSeoController::class);
     Route::apiResource('setting', App\Http\Controllers\Api\SettingController::class);
+    Route::apiResource('user', App\Http\Controllers\Api\UserController::class);
 });

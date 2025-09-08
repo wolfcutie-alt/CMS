@@ -87,6 +87,35 @@ class ApiClient {
     return this.request<{ user: LoginResponse['user'] }>('/auth/user');
   }
 
+  // Users
+  async getUsers(page: number = 1, perPage: number = 10): Promise<{ data: any[]; meta: any }>{
+    return this.request<{ data: any[]; meta: any }>(`/user?page=${page}&per_page=${perPage}`);
+  }
+
+  async getSingleUser(id: number): Promise<any> {
+    return this.request<any>(`/user/${id}`);
+  }
+
+  async createUser(data: { name: string; email: string; password: string; role?: string; status?: string }): Promise<any> {
+    return this.request<any>('/user', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateUser(id: number, data: Partial<{ name: string; email: string; password: string; role: string; status: string }>): Promise<any> {
+    return this.request<any>(`/user/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteUser(id: number): Promise<{ message: string }>{
+    return this.request<{ message: string }>(`/user/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Comment operations
   async getComments(page: number = 1, perPage: number = 10): Promise<{ data: Comment[]; meta: any }> {
     return this.request<{ data: Comment[]; meta: any }>(`/comment?page=${page}&per_page=${perPage}`);

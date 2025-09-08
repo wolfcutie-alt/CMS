@@ -38,8 +38,8 @@ class AnalyticController extends Controller
      *      path="/analytic",
      *      operationId="createAnAnalytic",
      *      tags={"Analytic"},
-     *      summary="Create a analytic",
-     *      description="Create a analytic",
+     *      summary="Create an analytic",
+     *      description="Create an analytic",
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation"

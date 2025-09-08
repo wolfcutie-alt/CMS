@@ -31,8 +31,8 @@
                 "tags": [
                     "Analytic"
                 ],
-                "summary": "Create a analytic",
-                "description": "Create a analytic",
+                "summary": "Create an analytic",
+                "description": "Create an analytic",
                 "operationId": "createAnAnalytic",
                 "responses": {
                     "201": {
@@ -852,6 +852,92 @@
                     }
                 ]
             }
+        },
+        "/user": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get list of users",
+                "description": "Returns list of users",
+                "operationId": "getUsersList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key_security_example": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create a user",
+                "description": "Create a user",
+                "operationId": "createAnUser",
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key_security_example": []
+                    }
+                ]
+            }
+        },
+        "/user/:id": {
+            "put": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update an user",
+                "operationId": "updateAnUser",
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key_security_example": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete an user",
+                "operationId": "deleteAnUser",
+                "responses": {
+                    "204": {
+                        "description": "Successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key_security_example": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
@@ -886,6 +972,10 @@
         {
             "name": "Setting",
             "description": "Setting"
+        },
+        {
+            "name": "User",
+            "description": "User"
         }
     ]
 }

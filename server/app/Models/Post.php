@@ -8,6 +8,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Post extends Model
 {
     /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'status',
+        'authorId',
+        'categoryId',
+        'featuredImage',
+        'views',
+        'likes',
+        'shares',
+        'publishedAt',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'publishedAt' => 'datetime',
+    ];
+
+    /**
      * Get the category that owns the post.
      */
     public function category(): BelongsTo
