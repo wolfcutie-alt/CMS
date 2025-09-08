@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +25,8 @@ import {
 import { useUsers } from "@/hooks/useUser"
 
 export default function UsersPage() {
+  const router = useRouter()
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -37,6 +40,56 @@ export default function UsersPage() {
   })
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUsers(1, 20)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const raw = localStorage.getItem("user")
+      const parsed = raw ? JSON.parse(raw) : null
+      const role = parsed?.role ?? null
+      if (role === "admin") {
+        setIsAuthorized(true)
+      } else {
+        setIsAuthorized(false)
+        router.replace("/")
+      }
+    } catch {
+      setIsAuthorized(false)
+      router.replace("/")
+    }
+  }, [router])
+
+  const normalizedUsers = useMemo(() => {
+    return users.map(u => {
+      const name = u.name || "";
+      const parts = name.split(" ");
+      const first = parts[0] || "";
+      const last = parts.slice(1).join(" ") || "";
+      return {
+        id: u.id,
+        firstName: first,
+        lastName: last,
+        name,
+        email: u.email,
+        role: (u as any).role || "author",
+        status: (u as any).status || "pending",
+        created_at: (u as any).created_at,
+        avatar: "/placeholder.svg?height=40&width=40&text=" + (first[0] || "U") + (last[0] || ""),
+      };
+    });
+  }, [users])
+
+  if (isAuthorized === false) {
+    return null
+  }
+
+  if (isAuthorized === null) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -63,26 +116,6 @@ export default function UsersPage() {
         return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border border-gray-200"
     }
   }
-  
-  const normalizedUsers = useMemo(() => {
-    return users.map(u => {
-      const name = u.name || "";
-      const parts = name.split(" ");
-      const first = parts[0] || "";
-      const last = parts.slice(1).join(" ") || "";
-      return {
-        id: u.id,
-        firstName: first,
-        lastName: last,
-        name,
-        email: u.email,
-        role: (u as any).role || "author",
-        status: (u as any).status || "pending",
-        created_at: (u as any).created_at,
-        avatar: "/placeholder.svg?height=40&width=40&text=" + (first[0] || "U") + (last[0] || ""),
-      };
-    });
-  }, [users])
 
   const filteredUsers = normalizedUsers.filter((user) => {
     const matchesSearch =

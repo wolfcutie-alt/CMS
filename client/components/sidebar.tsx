@@ -4,11 +4,27 @@ import { Button } from "@/components/ui/button"
 import { LayoutDashboard, FileText, Users, Settings, BarChart3, Tags, ImageIcon, MessageSquare } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [userRole, setUserRole] = useState<string | null>(null)
 
-  const menuItems = [
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("user")
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          setUserRole(parsed?.role ?? null)
+        }
+      } catch {
+        setUserRole(null)
+      }
+    }
+  }, [])
+
+  const baseMenuItems = [
     {
       title: "Dashboard",
       icon: LayoutDashboard,
@@ -40,12 +56,6 @@ export function Sidebar() {
       color: "text-pink-400",
     },
     {
-      title: "Users",
-      icon: Users,
-      href: "/users",
-      color: "text-indigo-400",
-    },
-    {
       title: "Analytics",
       icon: BarChart3,
       href: "/analytics",
@@ -58,6 +68,19 @@ export function Sidebar() {
       color: "text-red-400",
     },
   ]
+
+  const menuItems = useMemo(() => {
+    const items = [...baseMenuItems]
+    if (userRole === "admin") {
+      items.splice(5, 0, {
+        title: "Users",
+        icon: Users,
+        href: "/users",
+        color: "text-indigo-400",
+      })
+    }
+    return items
+  }, [userRole])
 
   return (
     <div className="w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 flex flex-col shadow-xl">
