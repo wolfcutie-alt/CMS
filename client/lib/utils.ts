@@ -30,22 +30,40 @@ export const validateSlug = (slug: string): string | null => {
 }
 
 // Data formatting utilities
-export const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
+export const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'Date not available'
+  
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid date'
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch (error) {
+    return 'Date not available'
+  }
 }
 
-export const formatDateTime = (dateString: string): string => {
-  return new Date(dateString).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+export const formatDateTime = (dateString: string | null | undefined): string => {
+  if (!dateString) return 'Date not available'
+  
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid date'
+    
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (error) {
+    return 'Date not available'
+  }
 }
 
 export const generateSlug = (title: string): string => {

@@ -1,3 +1,5 @@
+import type { Comment } from '@/types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 interface LoginResponse {
@@ -83,6 +85,52 @@ class ApiClient {
 
   async getUser(): Promise<{ user: LoginResponse['user'] }> {
     return this.request<{ user: LoginResponse['user'] }>('/auth/user');
+  }
+
+  // Comment operations
+  async getComments(page: number = 1, perPage: number = 10): Promise<{ data: Comment[]; meta: any }> {
+    return this.request<{ data: Comment[]; meta: any }>(`/comment?page=${page}&per_page=${perPage}`);
+  }
+
+  async getComment(id: number): Promise<Comment> {
+    return this.request<Comment>(`/comment/${id}`);
+  }
+
+  async updateComment(id: number, data: Partial<Comment>): Promise<Comment> {
+    return this.request<Comment>(`/comment/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteComment(id: number): Promise<void> {
+    return this.request<void>(`/comment/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async createComment(data: Omit<Comment, 'id' | 'created_at' | 'updated_at'>): Promise<Comment> {
+    return this.request<Comment>('/comment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Comment moderation actions
+  async approveComment(id: number): Promise<Comment> {
+    return this.updateComment(id, { status: 'approved' });
+  }
+
+  async rejectComment(id: number): Promise<Comment> {
+    return this.updateComment(id, { status: 'spam' });
+  }
+
+  async flagComment(id: number): Promise<Comment> {
+    return this.updateComment(id, { status: 'flagged' });
+  }
+
+  async replyToComment(parentId: number, data: Omit<Comment, 'id' | 'parentId' | 'created_at' | 'updated_at'>): Promise<Comment> {
+    return this.createComment({ ...data, parentId });
   }
 }
 

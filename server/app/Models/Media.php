@@ -21,6 +21,8 @@ class Media extends Model
         'uploadedBy',
     ];
 
+    protected $appends = ['uploadedAt'];
+
     protected $casts = [
         'size' => 'integer',
         'created_at' => 'datetime',
@@ -31,10 +33,5 @@ class Media extends Model
     public function getUploadedAtAttribute()
     {
         return $this->created_at;
-    }
-
-    public function getUpdatedAtAttribute()
-    {
-        return $this->attributes['updated_at'];
     }
 }

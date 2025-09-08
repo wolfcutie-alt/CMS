@@ -14,4 +14,12 @@ class Post extends Model
     {
         return $this->belongsTo(Category::class, 'categoryId');
     }
+
+    /**
+     * Get the author that owns the post.
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'authorId');
+    }
 }

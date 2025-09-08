@@ -29,7 +29,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        return response()->json(Post::all(), 200);
+        return response()->json(Post::with('author')->get(), 200);
     }
 
     /**
@@ -77,7 +77,7 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Post::findOrFail($id);
+        $post = Post::with('author')->findOrFail($id);
         return response()->json($post, 200);
     }
 

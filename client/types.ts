@@ -1,5 +1,13 @@
 export type PostStatus = 'draft' | 'published' | 'archived';
 
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Post {
     id: number;                     // INT PK
     title: string;                  // VARCHAR(255)
@@ -8,6 +16,7 @@ export interface Post {
     content: string;                // LONGTEXT/TEXT
     status: PostStatus;             // ENUM
     authorId: number;               // INT
+    author?: User;                  // User object when loaded with relationship
     categoryId: number | null;      // INT, nullable if not always set
     featuredImage: string | null;   // VARCHAR(255) URL or path
     views: number;                  // INT
@@ -58,7 +67,7 @@ export interface Category {
 }
   
 
-export type CommentStatus = 'approved' | 'pending' | 'spam' | 'deleted'; // adjust to your ENUM values
+export type CommentStatus = 'approved' | 'pending' | 'spam' | 'flagged'; // matches DB ENUM
 
 export interface Comment {
   id: number;                 // INT, primary key
@@ -72,6 +81,10 @@ export interface Comment {
   userAgent: string | null;   // TEXT, nullable
   created_at: string;         // TIMESTAMP ISO string
   updated_at: string;         // TIMESTAMP ISO string
+  // Additional fields for UI
+  post?: Post;                // Post object when loaded with relationship
+  replies?: Comment[];        // Child comments
+  replies_count?: number;     // Count of replies
 }
 
 // Type describing the `media` table shown on the screen
@@ -86,8 +99,8 @@ export type Media = {
     thumbnailUrl: string | null       // VARCHAR, nullable
     alt: string | null                // VARCHAR, nullable
     caption: string | null            // TEXT, nullable
-    uploadedAt: string                // TIMESTAMP ISO
-    updatedAt: string                 // TIMESTAMP ISO
+    uploadedAt: string | null         // TIMESTAMP ISO, nullable
+    updatedAt: string | null          // TIMESTAMP ISO, nullable
 }
 
 // Type for a row in laravel.post_media

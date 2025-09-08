@@ -187,7 +187,7 @@ export default function ContentPage() {
                           </div>
                           <p className="text-gray-600 mb-3">{post.excerpt}</p>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span>By {post.authorId}</span>
+                            <span>By {post.author?.name || `User ${post.authorId}`}</span>
                             <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Not published'}</span>
                             <span className="flex items-center gap-1">
                               <Eye className="w-4 h-4" />

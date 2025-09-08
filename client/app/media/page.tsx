@@ -355,7 +355,7 @@ export default function MediaPage() {
                           <span className="text-sm text-gray-500">{formatFileSize(media.size)}</span>
                         </div>
                         <div className="text-xs text-gray-500">
-                          {media.uploadedAt ? formatDate(media.uploadedAt) : 'Date not available'}
+                          {formatDate(media.uploadedAt)}
                         </div>
                         <div className="flex gap-2 pt-2">
                           <Button 
