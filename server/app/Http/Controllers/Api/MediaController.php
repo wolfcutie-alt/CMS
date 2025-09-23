@@ -229,35 +229,50 @@ class MediaController extends Controller
      * 
      * Delete a media
      */
-    public function destroy(Media $media)
+    public function destroy($id)
     {
         try {
+            // Find the media record first
+            $media = Media::find($id);
+            
+            if (!$media) {
+                return response()->json(['message' => 'Media not found'], 404);
+            }
+
             // Delete original file from storage
-            $path = str_replace('/storage/', '', $media->url);
-            if (Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
-                Log::info('Original file deleted', ['path' => $path]);
+            if ($media->url) {
+                // Handle different URL formats
+                $path = $media->url;
+                if (strpos($path, '/storage/') === 0) {
+                    $path = str_replace('/storage/', '', $path);
+                } elseif (strpos($path, 'storage/') === 0) {
+                    $path = str_replace('storage/', '', $path);
+                }
+                
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
             }
             
             // Delete thumbnail file if it exists
             if ($media->thumbnailUrl) {
-                $thumbnailPath = str_replace('/storage/', '', $media->thumbnailUrl);
+                $thumbnailPath = $media->thumbnailUrl;
+                if (strpos($thumbnailPath, '/storage/') === 0) {
+                    $thumbnailPath = str_replace('/storage/', '', $thumbnailPath);
+                } elseif (strpos($thumbnailPath, 'storage/') === 0) {
+                    $thumbnailPath = str_replace('storage/', '', $thumbnailPath);
+                }
+                
                 if (Storage::disk('public')->exists($thumbnailPath)) {
                     Storage::disk('public')->delete($thumbnailPath);
-                    Log::info('Thumbnail file deleted', ['path' => $thumbnailPath]);
                 }
             }
             
             // Delete database record
             $media->delete();
-            Log::info('Media record deleted from database', ['id' => $media->id]);
             
             return response()->json(null, 204);
         } catch (\Exception $e) {
-            Log::error('Failed to delete media', [
-                'id' => $media->id,
-                'error' => $e->getMessage()
-            ]);
             return response()->json(['message' => 'Failed to delete media: ' . $e->getMessage()], 500);
         }
     }

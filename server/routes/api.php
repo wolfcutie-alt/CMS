@@ -8,6 +8,35 @@ use App\Http\Controllers\Api\AuthController;
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/signup', [AuthController::class, 'signup']);
 
+// Public media serving route
+Route::get('/media-file/{filename}', function ($filename) {
+    // Try storage path first (newer files)
+    $storagePath = storage_path('app/public/media/' . $filename);
+    
+    if (file_exists($storagePath)) {
+        $file = file_get_contents($storagePath);
+        $mimeType = mime_content_type($storagePath);
+        
+        return response($file, 200)
+            ->header('Content-Type', $mimeType)
+            ->header('Content-Disposition', 'inline');
+    }
+    
+    // Try public uploads path (older files)
+    $uploadsPath = public_path('uploads/' . $filename);
+    
+    if (file_exists($uploadsPath)) {
+        $file = file_get_contents($uploadsPath);
+        $mimeType = mime_content_type($uploadsPath);
+        
+        return response($file, 200)
+            ->header('Content-Type', $mimeType)
+            ->header('Content-Disposition', 'inline');
+    }
+    
+    abort(404);
+})->where('filename', '.*');
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);

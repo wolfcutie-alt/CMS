@@ -147,6 +147,9 @@ export default function MediaPage() {
         title: "Success",
         description: "Media deleted successfully",
       })
+      // Close modal and clear state after successful deletion
+      setIsDeleteModalOpen(false)
+      setMediaToDelete(null)
     } catch (error) {
       console.error('Delete error:', error)
       toast({
@@ -209,9 +212,31 @@ export default function MediaPage() {
 
   const handleView = (media: Media) => {
     try {
-      // Ensure the URL is absolute
-      const url = media.url.startsWith('http') ? media.url : `${window.location.origin}${media.url}`
-      window.open(url, '_blank')
+      // Extract filename from the stored URL
+      let filename = ''
+      if (media.url.includes('/storage/media/')) {
+        filename = media.url.split('/storage/media/')[1]
+      } else if (media.url.includes('storage/media/')) {
+        filename = media.url.split('storage/media/')[1]
+      } else if (media.url.includes('/uploads/')) {
+        filename = media.url.split('/uploads/')[1]
+      } else if (media.url.includes('uploads/')) {
+        filename = media.url.split('uploads/')[1]
+      } else if (media.url.includes('/media/')) {
+        filename = media.url.split('/media/')[1]
+      } else {
+        // Fallback to original URL
+        const url = media.url.startsWith('http') ? media.url : `${window.location.origin}${media.url}`
+        window.open(url, '_blank')
+        return
+      }
+      
+      // Use the new media serving route
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      // Remove trailing /api if it exists to avoid double /api/
+      const baseUrl = apiUrl.replace(/\/api\/?$/, '')
+      const viewUrl = `${baseUrl}/api/media-file/${filename}`
+      window.open(viewUrl, '_blank')
     } catch (error) {
       toast({
         title: "View Error",

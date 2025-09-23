@@ -12,9 +12,11 @@ import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useComments } from "@/hooks/useComment"
+import { usePosts } from "@/hooks/usePost"
 import { DeleteConfirmation } from "@/components/delete-confirmation"
 import { ReplyModal } from "@/components/reply-modal"
 import { useToast } from "@/hooks/use-toast"
+import { useMemo } from "react"
 import type { Comment } from "@/types"
 
 export default function CommentsPage() {
@@ -38,6 +40,17 @@ export default function CommentsPage() {
     deleteComment, 
     replyToComment 
   } = useComments(currentPage, 10)
+
+  const { posts } = usePosts() // Fetch all posts for title mapping
+
+  // Create a map of post ID to post title
+  const postMap = useMemo(() => {
+    const map = new Map<number, string>()
+    posts.forEach(post => {
+      map.set(post.id, post.title)
+    })
+    return map
+  }, [posts])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -281,7 +294,7 @@ export default function CommentsPage() {
                           <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-500">
                               <p>
-                                On: <span className="font-medium">{comment.post?.title || `Post #${comment.postId}`}</span>
+                                On: <span className="font-medium">{comment.post?.title || postMap.get(comment.postId) || `Post #${comment.postId}`}</span>
                               </p>
                               <p>Email: {comment.email}</p>
                             </div>

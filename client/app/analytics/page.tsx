@@ -8,10 +8,60 @@ import { Header } from "@/components/header"
 import { Sidebar } from "@/components/sidebar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAnalytics } from "@/hooks/useAnalytic"
+import { useUsers } from "@/hooks/useUser"
+import { usePosts } from "@/hooks/usePost"
+import { useCategories } from "@/hooks/useCategory"
 import { useMemo } from "react"
 
 export default function AnalyticsPage() {
   const { analytics, loading, error } = useAnalytics()
+  const { users } = useUsers(1, 1000) // Fetch all users
+  const { posts } = usePosts() // Fetch all posts
+  const { categories } = useCategories() // Fetch all categories
+
+  // Create a map of user ID to user name
+  const userMap = useMemo(() => {
+    const map = new Map<number, string>()
+    users.forEach(user => {
+      map.set(user.id, user.name)
+    })
+    return map
+  }, [users])
+
+  // Create maps for target names
+  const postMap = useMemo(() => {
+    const map = new Map<number, string>()
+    posts.forEach(post => {
+      map.set(post.id, post.title)
+    })
+    return map
+  }, [posts])
+
+  const categoryMap = useMemo(() => {
+    const map = new Map<number, string>()
+    categories.forEach(category => {
+      map.set(category.id, category.name)
+    })
+    return map
+  }, [categories])
+
+  // Function to get target name based on entity type and ID
+  const getTargetName = useMemo(() => {
+    return (entityType: string, entityId: number) => {
+      switch (entityType) {
+        case 'post':
+          return postMap.get(entityId) || `Post #${entityId}`
+        case 'category':
+          return categoryMap.get(entityId) || `Category #${entityId}`
+        case 'comment':
+          return `Comment #${entityId}`
+        case 'user':
+          return userMap.get(entityId) || `User #${entityId}`
+        default:
+          return `${entityType} #${entityId}`
+      }
+    }
+  }, [postMap, categoryMap, userMap])
 
   const stats = useMemo(() => {
     const totalViews = analytics.filter(a => a.type === 'view').length
@@ -82,7 +132,7 @@ export default function AnalyticsPage() {
         const latest = related.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
         return {
           id: postId,
-          title: `Post #${postId}`,
+          title: postMap.get(postId) || `Post #${postId}`,
           views,
           comments: commentsByPost.get(postId) || 0,
           date: latest ? new Date(latest.created_at).toISOString().slice(0, 10) : "",
@@ -90,7 +140,7 @@ export default function AnalyticsPage() {
       })
 
     return items
-  }, [analytics])
+  }, [analytics, postMap])
 
   const trafficSources = useMemo(() => {
     // Prefer metadata.source if available; fallback to entityType distribution
@@ -124,11 +174,11 @@ export default function AnalyticsPage() {
       .map(a => ({
         id: a.id,
         action: describeAction(a.type),
-        target: `${a.entityType} #${a.entityId}`,
-        user: a.userId ? `User #${a.userId}` : 'Anonymous',
+        target: getTargetName(a.entityType, a.entityId),
+        user: a.userId ? (userMap.get(a.userId) || `User #${a.userId}`) : 'Anonymous',
         time: new Date(a.created_at).toLocaleString(),
       }))
-  }, [analytics])
+  }, [analytics, userMap, getTargetName])
 
   return (
     <div className="flex h-screen bg-gray-100">
