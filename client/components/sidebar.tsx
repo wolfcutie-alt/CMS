@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { LayoutDashboard, FileText, Users, Settings, BarChart3, Tags, ImageIcon, MessageSquare } from "lucide-react"
+import { LayoutDashboard, FileText, Users, Settings, BarChart3, Tags, ImageIcon, MessageSquare, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -60,6 +60,12 @@ export function Sidebar() {
       icon: BarChart3,
       href: "/analytics",
       color: "text-orange-400",
+    },
+    {
+      title: "Profile",
+      icon: User,
+      href: "/profile",
+      color: "text-cyan-400",
     },
     {
       title: "Settings",

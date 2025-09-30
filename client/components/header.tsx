@@ -61,8 +61,19 @@ export function Header() {
                 {user ? `${user.name}` : "My Account"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-slate-600 hover:text-blue-600">Profile</DropdownMenuItem>
-              <DropdownMenuItem className="text-slate-600 hover:text-purple-600">Settings</DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-slate-600 hover:text-blue-600 cursor-pointer"
+                onClick={() => router.push("/profile")}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-slate-600 hover:text-purple-600 cursor-pointer"
+                onClick={() => router.push("/settings")}
+              >
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50">
                 <LogOut className="w-4 h-4 mr-2" />
