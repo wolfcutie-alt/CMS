@@ -22,10 +22,7 @@ export default function ForgotPasswordPage() {
     setError("")
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock password reset email
       setIsEmailSent(true)
     } catch (err) {
       setError("An error occurred. Please try again.")
