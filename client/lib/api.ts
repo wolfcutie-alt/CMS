@@ -52,13 +52,34 @@ class ApiClient {
     const response = await fetch(url, config);
 
     if (!response.ok) {
-      const errorData: ApiError = await response.json().catch(() => ({
-        message: 'An error occurred',
-      }));
+      let errorMessage = 'An error occurred';
+      
+      try {
+        const errorData: ApiError = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        switch (response.status) {
+          case 401:
+            errorMessage = 'Invalid credentials';
+            break;
+          case 403:
+            errorMessage = 'Access denied';
+            break;
+          case 404:
+            errorMessage = 'Resource not found';
+            break;
+          case 422:
+            errorMessage = 'Validation error';
+            break;
+          case 500:
+            errorMessage = 'Internal server error';
+            break;
+          default:
+            errorMessage = `HTTP error! status: ${response.status}`;
+        }
+      }
 
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -72,10 +93,17 @@ class ApiClient {
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
-    return this.request<LoginResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      return await this.request<LoginResponse>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Unable to connect to server. Please check your internet connection and try again.');
+      }
+      throw error;
+    }
   }
 
   async logout(): Promise<{ message: string }> {

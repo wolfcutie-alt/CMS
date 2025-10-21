@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { use } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,6 +16,50 @@ import { useToast } from "@/hooks/use-toast"
 import { Post } from "@/types"
 
 function ViewPostContent({ postId }: { postId: number }) {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem("isAuthenticated")
+      if (authStatus === "true") {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+        // Redirect to landing page if not authenticated
+        router.push("/landing")
+      }
+    }
+
+    checkAuth()
+  }, [router, postId, isHydrated])
+
+  // Show loading while hydrating or checking authentication
+  if (!isHydrated || isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // If not authenticated, the redirect will happen
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Only call hooks after authentication is confirmed
+  return <ViewPostContentInner postId={postId} />
+}
+
+function ViewPostContentInner({ postId }: { postId: number }) {
   const { getPost } = usePosts()
   const { categories } = useCategories()
   const { toast } = useToast()

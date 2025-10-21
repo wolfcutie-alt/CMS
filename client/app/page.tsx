@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, FileText, Users, Eye, TrendingUp, MessageSquare} from "lucide-react"
@@ -11,6 +13,49 @@ import { usePosts } from "@/hooks/usePost"
 import { useMemo } from "react"
 
 export default function Dashboard() {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem("isAuthenticated")
+      if (authStatus === "true") {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+        router.push("/landing")
+      }
+    }
+
+    checkAuth()
+  }, [router, isHydrated])
+
+  // Show loading while hydrating or checking authentication
+  if (!isHydrated || isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // If not authenticated, the redirect will happen
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Only call hooks after authentication is confirmed
+  return <DashboardContent />
+}
+
+function DashboardContent() {
   const { analytics, loading, error } = useAnalytics()
   const { posts, loading: postsLoading } = usePosts()
 

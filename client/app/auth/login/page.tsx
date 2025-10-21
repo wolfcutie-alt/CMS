@@ -35,10 +35,25 @@ export default function LoginPage() {
       
       router.push("/")
     } catch (err) {
+      console.error('Login error:', err)
+      
       if (err instanceof Error) {
-        setError(err.message)
+        // Handle specific error messages
+        if (err.message.includes('401') || err.message.includes('Unauthorized')) {
+          setError("Invalid email or password. Please check your credentials and try again.")
+        } else if (err.message.includes('422') || err.message.includes('validation')) {
+          setError("Please check your email and password format.")
+        } else if (err.message.includes('500') || err.message.includes('Internal Server Error')) {
+          setError("Server error. Please try again later.")
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+          setError("Unable to connect to server. Please check your internet connection and try again.")
+        } else if (err.message.includes('403') || err.message.includes('Forbidden')) {
+          setError("Access denied. Please contact an administrator.")
+        } else {
+          setError(err.message)
+        }
       } else {
-        setError("An error occurred. Please try again.")
+        setError("Login failed. Please check your credentials and try again.")
       }
     } finally {
       setIsLoading(false)

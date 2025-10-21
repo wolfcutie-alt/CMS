@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,14 @@ export default function NewPostPage() {
   const { createPost } = usePosts()
   const { categories, loading: categoriesLoading } = useCategories()
   const { toast } = useToast()
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
 
   const [formData, setFormData] = useState({
     title: "",
@@ -97,7 +105,7 @@ export default function NewPostPage() {
         ...formData,
         status: publish ? "published" : formData.status,
         categoryId: formData.categoryId && formData.categoryId !== "none" ? parseInt(formData.categoryId) : null,
-        authorId: 1, // This should come from auth context
+        authorId: user?.id || 1,
         publishedAt: publish ? new Date().toISOString() : null,
       }
 

@@ -7,13 +7,27 @@ import { useRouter, usePathname } from "next/navigation"
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
     const checkAuth = () => {
       const authStatus = localStorage.getItem("isAuthenticated")
       const isAuthPage = pathname.startsWith("/auth")
+      const isLandingPage = pathname === "/landing"
+      const isPublicContentPage = pathname.startsWith("/content") && (
+        pathname === "/content" || 
+        pathname.match(/^\/content\/\d+$/) || // matches /content/123 but not /content/123/edit
+        pathname === "/content/public" ||
+        pathname.match(/^\/content\/\d+\/public$/) // matches /content/123/public
+      )
 
       if (authStatus === "true") {
         setIsAuthenticated(true)
@@ -23,18 +37,18 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
       } else {
         setIsAuthenticated(false)
-        // If user is not authenticated and not on auth page, redirect to login
-        if (!isAuthPage) {
-          router.push("/auth/login")
+        // If user is not authenticated and not on auth page, landing page, or public content page, redirect to landing
+        if (!isAuthPage && !isLandingPage && !isPublicContentPage) {
+          router.push("/landing")
         }
       }
     }
 
     checkAuth()
-  }, [pathname, router])
+  }, [pathname, router, isHydrated])
 
-  // Show loading while checking authentication
-  if (isAuthenticated === null) {
+  // Show loading while hydrating or checking authentication
+  if (!isHydrated || isAuthenticated === null) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -44,6 +58,23 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Show auth pages without guard
   if (pathname.startsWith("/auth")) {
+    return <>{children}</>
+  }
+
+  // Show landing page without authentication
+  if (pathname === "/landing") {
+    return <>{children}</>
+  }
+
+  // Show public content pages without authentication
+  const isPublicContentPage = pathname.startsWith("/content") && (
+    pathname === "/content" || 
+    pathname.match(/^\/content\/\d+$/) || // matches /content/123 but not /content/123/edit
+    pathname === "/content/public" ||
+    pathname.match(/^\/content\/\d+\/public$/) // matches /content/123/public
+  )
+  
+  if (isPublicContentPage) {
     return <>{children}</>
   }
 

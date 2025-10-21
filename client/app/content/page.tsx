@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +27,50 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function ContentPage() {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const checkAuth = () => {
+      const authStatus = localStorage.getItem("isAuthenticated")
+      if (authStatus === "true") {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+        // Redirect to landing page if not authenticated
+        router.push("/landing")
+      }
+    }
+
+    checkAuth()
+  }, [router, isHydrated])
+
+  // Show loading while hydrating or checking authentication
+  if (!isHydrated || isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // If not authenticated, the redirect will happen
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Only call hooks after authentication is confirmed
+  return <ContentPageContent />
+}
+
+function ContentPageContent() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [deletePostId, setDeletePostId] = useState<number | null>(null)

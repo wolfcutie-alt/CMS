@@ -8,6 +8,10 @@ use App\Http\Controllers\Api\AuthController;
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/signup', [AuthController::class, 'signup']);
 
+// Public post viewing routes
+Route::get('/post', [App\Http\Controllers\Api\PostController::class, 'index']);
+Route::get('/post/{id}', [App\Http\Controllers\Api\PostController::class, 'show']);
+
 // Public media serving route
 Route::get('/media-file/{filename}', function ($filename) {
     // Try storage path first (newer files)
@@ -41,7 +45,12 @@ Route::get('/media-file/{filename}', function ($filename) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/user', [AuthController::class, 'user']);
-    Route::apiResource('post', App\Http\Controllers\Api\PostController::class);
+    
+    // Post management routes (create, update, delete)
+    Route::post('/post', [App\Http\Controllers\Api\PostController::class, 'store']);
+    Route::put('/post/{id}', [App\Http\Controllers\Api\PostController::class, 'update']);
+    Route::delete('/post/{id}', [App\Http\Controllers\Api\PostController::class, 'destroy']);
+    
     Route::apiResource('analytic', App\Http\Controllers\Api\AnalyticController::class);
     Route::apiResource('category', App\Http\Controllers\Api\CategoryController::class);
     Route::apiResource('comment', App\Http\Controllers\Api\CommentController::class);
